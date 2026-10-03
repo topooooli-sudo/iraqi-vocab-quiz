@@ -1,38 +1,333 @@
+<!DOCTYPE html>
 <html lang="fa" dir="rtl">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-
-<script src="https://developer.eitaa.com/eitaa-web-app.js"></script>
-
-  <!DOCTYPE html>
-<title>آزمون عربی</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>آزمون عربی عراقی - 40 سؤال</title>
+<style>
+*{box-sizing:border-box}
+body{
+  margin:0;
+  font-family:Tahoma,Arial,sans-serif;
+  background:#f5f7fb;
+  color:#222;
+}
+.container{
+  max-width:720px;
+  margin:auto;
+  padding:18px 14px 40px;
+}
+.card{
+  background:#fff;
+  border-radius:18px;
+  padding:20px;
+  margin-bottom:16px;
+  box-shadow:0 3px 14px rgba(0,0,0,.08);
+}
+h1{
+  font-size:23px;
+  text-align:center;
+  margin:5px 0 8px;
+}
+.subtitle{
+  text-align:center;
+  color:#666;
+  margin-bottom:18px;
+}
+.progress{
+  height:9px;
+  background:#e7e9ee;
+  border-radius:10px;
+  overflow:hidden;
+  margin:12px 0 20px;
+}
+.progress-bar{
+  height:100%;
+  width:0%;
+  background:#2e7d32;
+  transition:.25s;
+}
+.question-number{
+  font-weight:bold;
+  margin-bottom:12px;
+}
+.question{
+  font-size:19px;
+  line-height:1.8;
+  margin-bottom:18px;
+}
+.option{
+  width:100%;
+  border:1px solid #d7dbe2;
+  background:#fff;
+  border-radius:12px;
+  padding:13px 14px;
+  margin:9px 0;
+  text-align:right;
+  font-size:16px;
+  cursor:pointer;
+  transition:.15s;
+}
+.option:hover{background:#f3f6f9}
+.option:disabled{cursor:default}
+.option.correct{
+  background:#dff3e2;
+  border-color:#39a34a;
+}
+.option.wrong{
+  background:#fde0e0;
+  border-color:#d33b3b;
+}
+.feedback{
+  display:none;
+  margin-top:15px;
+  padding:12px;
+  border-radius:11px;
+  font-weight:bold;
+}
+.feedback.correct{display:block;background:#e5f6e8;color:#176b27}
+.feedback.wrong{display:block;background:#fde7e7;color:#a21f1f}
+.next{
+  width:100%;
+  border:0;
+  border-radius:12px;
+  padding:14px;
+  margin-top:15px;
+  background:#333;
+  color:white;
+  font-size:17px;
+  cursor:pointer;
+}
+.next:disabled{opacity:.45;cursor:default}
+.result{text-align:center}
+.score{
+  font-size:34px;
+  font-weight:bold;
+  margin:15px 0;
+}
+.restart{
+  width:100%;
+  border:0;
+  border-radius:12px;
+  padding:14px;
+  background:#2e7d32;
+  color:#fff;
+  font-size:17px;
+  cursor:pointer;
+}
+.hidden{display:none}
+.small{font-size:13px;color:#777;text-align:center;margin-top:12px}
+</style>
 </head>
-
 <body>
+<div class="container">
 
-<h2>آزمون عربی عراقی</h2>
+<div class="card">
+  <h1>آزمون عربی عراقی</h1>
+  <div class="subtitle">۴۰ سؤال — هر سؤال ۰٫۵ نمره — مجموع ۲۰ نمره</div>
+  <div class="progress"><div class="progress-bar" id="progressBar"></div></div>
+  <div id="quiz"></div>
+</div>
 
-<p>معنی «شِبّاک» چیست؟</p>
+<div class="card result hidden" id="result">
+  <h2>نتیجه آزمون</h2>
+  <div class="score" id="score"></div>
+  <div id="resultText"></div>
+  <button class="restart" onclick="restartQuiz()">شروع دوباره</button>
+</div>
 
-<button onclick="check(1)">در</button>
-<button onclick="check(2)">پنجره</button>
-
-<p id="result"></p>
+</div>
 
 <script>
+const questions = [
+{q:"«شُوَكِت» یعنی چه؟", a:["کجا","کی / چه وقت","چقدر","چرا"], c:1},
+{q:"«وَيْن» یعنی چه؟", a:["کجا","چرا","کی","چطور"], c:0},
+{q:"«شْلَوْنَك؟» یعنی چه؟", a:["اسمت چیست؟","کجایی؟","حالت چطوره؟","چند سالته؟"], c:2},
+{q:"«شِسْمَك؟» یعنی چه؟", a:["کجایی؟","اسمت چیه؟","چی می‌خوری؟","کی میای؟"], c:1},
+{q:"«هَسَّه» یعنی چه؟", a:["دیروز","فردا","الان / همین حالا","بعداً"], c:2},
+{q:"«بَچِر» یعنی چه؟", a:["امروز","فردا","دیشب","هفته بعد"], c:1},
+{q:"«أَمْس» یعنی چه؟", a:["امروز","فردا","دیروز","الان"], c:2},
+{q:"«هِنانه» یعنی چه؟", a:["آنجا","اینجا","بالا","پایین"], c:1},
+{q:"«هِنَاك» یعنی چه؟", a:["اینجا","آنجا","کنار","داخل"], c:1},
+{q:"«قُرِيب» در «مطعم قريب» یعنی چه؟", a:["دور","بزرگ","نزدیک","شلوغ"], c:2},
+{q:"«شْكُو مَا شْكُو؟» بیشتر چه مفهومی دارد؟", a:["چه خبر؟","کجایی؟","چقدر است؟","چه می‌خوری؟"], c:0},
+{q:"«أرِيد» در گفتار عراقی یعنی چه؟", a:["می‌خواهم","می‌دانم","می‌روم","می‌بینم"], c:0},
+{q:"«مَا أَرِيد» یعنی چه؟", a:["نمی‌دانم","نمی‌خواهم","نمی‌روم","نمی‌بینم"], c:1},
+{q:"«أكْدَر» یعنی چه؟", a:["می‌توانم","می‌خواهم","می‌دانم","می‌گیرم"], c:0},
+{q:"«مَا أَكْدَر» یعنی چه؟", a:["نمی‌خواهم","نمی‌توانم","نمی‌دانم","نمی‌روم"], c:1},
+{q:"«أحچي» یعنی چه؟", a:["می‌خورم","صحبت می‌کنم","می‌خوابم","می‌نشینم"], c:1},
+{q:"«جاي أَحچي» یعنی چه؟", a:["صحبت کردم","دارم صحبت می‌کنم","صحبت خواهم کرد","صحبت نکن"], c:1},
+{q:"«راح أروح» یعنی چه؟", a:["رفتم","دارم می‌روم","خواهم رفت","نرو"], c:2},
+{q:"«لا تِروح» یعنی چه؟", a:["نرو","نرفتم","می‌روم","برو"], c:0},
+{q:"«شَاف» یعنی چه؟", a:["گفت","دید","خرید","فروخت"], c:1},
+{q:"«بَاع» یعنی چه؟", a:["خرید","فروخت","دید","گفت"], c:1},
+{q:"«رَاح» یعنی چه؟", a:["آمد","رفت","خوابید","ترسید"], c:1},
+{q:"«نَام» یعنی چه؟", a:["خوابید","ایستاد","رفت","خورد"], c:0},
+{q:"«خَاف» یعنی چه؟", a:["خندید","ترسید","دوید","گفت"], c:1},
+{q:"«گَام» در عراقی یعنی چه؟", a:["بلند شد / از جا بلند شد","خوابید","فروخت","پرسید"], c:0},
+{q:"«گَال» یعنی چه؟", a:["گفت","دید","آمد","گرفت"], c:0},
+{q:"«صَار» یعنی چه؟", a:["شد / تبدیل شد","رفت","خورد","خرید"], c:0},
+{q:"«سَوّي» یعنی چه؟", a:["بیا","انجام بده / درست کن","بخواب","برو"], c:1},
+{q:"«اِنْتَظِر» در گفتار عراقی یعنی چه؟", a:["صبر کن / منتظر باش","بیا","برو","بنشین"], c:0},
+{q:"برای «صبر کن» در گفتار عراقی کدام طبیعی‌تر است؟", a:["اِسْتَنّى","أكُل","أروح","أشوف"], c:0},
+{q:"«فَحْص دَم» یعنی چه؟", a:["عکس‌برداری","آزمایش خون","آزمایش ادرار","سونوگرافی"], c:1},
+{q:"«أَسَوّي فَحْص دَم» یعنی چه؟", a:["آزمایش خون می‌دهم / انجام می‌دهم","خون می‌فروشم","دکتر می‌شوم","دارو می‌خرم"], c:0},
+{q:"«ناظور» در محیط درمانی عراقی به چه چیزی اشاره دارد؟", a:["رادیولوژی","آندوسکوپی / کولونوسکوپی","آزمایش خون","فشارخون"], c:1},
+{q:"«سُونار» یعنی چه؟", a:["سونوگرافی","تزریق","آندوسکوپی","آزمایش خون"], c:0},
+{q:"«إبْرَة» یعنی چه؟", a:["قرص","آمپول / سوزن","پماد","باند"], c:1},
+{q:"«وِين أَكُو أَكْل عِرَاقِي زَيْن؟» یعنی چه؟", a:["غذای عراقی خوب کجاست؟","غذای عراقی چقدر است؟","چه کسی غذای عراقی می‌پزد؟","غذای عراقی ندارید؟"], c:0},
+{q:"«مَطْعَم» یعنی چه؟", a:["داروخانه","رستوران","بیمارستان","آزمایشگاه"], c:1},
+{q:"«شِگَد؟» یعنی چه؟", a:["کجا؟","چرا؟","چقدر؟","کی؟"], c:2},
+{q:"«شْعَلَيْك؟» معمولاً یعنی چه؟", a:["چه ربطی به تو دارد؟ / به تو چه؟","کجایی؟","چقدر می‌خواهی؟","چه وقت می‌آیی؟"], c:0},
+{q:"«مَا أَدْرِي» یعنی چه؟", a:["نمی‌خواهم","نمی‌دانم","نمی‌توانم","نمی‌روم"], c:1},
+{q:"«إحْنَا» یعنی چه؟", a:["من","تو","او","ما"], c:3}
+];
 
-function check(x){
+let current = 0;
+let score = 0;
+let answered = false;
 
-if(x==2){
-document.getElementById("result").innerHTML="✅ درست";
-}else{
-document.getElementById("result").innerHTML="❌ غلط";
+function renderQuestion(){
+  answered = false;
+  const item = questions[current];
+  const quiz = document.getElementById("quiz");
+  quiz.innerHTML = `
+    <div class="question-number">سؤال ${current+1} از ${questions.length}</div>
+    <div class="question">${item.q}</div>
+    <div id="options">
+      ${item.a.map((x,i)=>`<button class="option" onclick="answer(${i})">${String.fromCharCode(65+i)}. ${x}</button>`).join("")}
+    </div>
+    <div id="feedback" class="feedback"></div>
+    <button id="next" class="next" onclick="nextQuestion()" disabled>
+      ${current === questions.length-1 ? "مشاهده نتیجه" : "سؤال بعدی"}
+    </button>
+  `;
+  document.getElementById("progressBar").style.width = `${(current/questions.length)*100}%`;
 }
 
+function answer(index){
+  if(answered) return;
+  answered = true;
+  const item = questions[current];
+  const buttons = document.querySelectorAll(".option");
+  buttons.forEach(b=>b.disabled=true);
+  buttons[item.c].classList.add("correct");
+  const feedback = document.getElementById("feedback");
+
+  if(index === item.c){
+    score += 0.5;
+    celebrate();
+    feedback.textContent = "✓ پاسخ درست — ۰٫۵ نمره";
+    feedback.className = "feedback correct";
+  }else{
+    buttons[index].classList.add("wrong");
+    feedback.textContent = "✗ پاسخ نادرست — پاسخ صحیح مشخص شده است";
+    feedback.className = "feedback wrong";
+  }
+  document.getElementById("next").disabled = false;
 }
 
+function nextQuestion(){
+  if(!answered) return;
+  current++;
+  if(current < questions.length){
+    renderQuestion();
+    window.scrollTo({top:0,behavior:"smooth"});
+  }else{
+    document.querySelector(".container > .card:first-child").classList.add("hidden");
+    document.getElementById("result").classList.remove("hidden");
+    document.getElementById("score").textContent = `${score.toFixed(1)} از 20`;
+    document.getElementById("resultText").textContent =
+      `تعداد پاسخ‌های صحیح: ${Math.round(score/0.5)} از ${questions.length}`;
+    document.getElementById("progressBar").style.width = "100%";
+    window.scrollTo({top:0,behavior:"smooth"});
+  }
+}
+
+function restartQuiz(){
+  current=0;
+  score=0;
+  document.getElementById("result").classList.add("hidden");
+  document.querySelector(".container > .card:first-child").classList.remove("hidden");
+  renderQuestion();
+}
+
+renderQuestion();
 </script>
+<canvas id="confettiCanvas"></canvas>
+<style>
+#confettiCanvas{
+  position:fixed;
+  inset:0;
+  width:100%;
+  height:100%;
+  pointer-events:none;
+  z-index:9999;
+}
+</style>
+<script>
+function celebrate(){
+  // ویبره کوتاه در گوشی‌های پشتیبانی‌شده
+  if (navigator.vibrate) {
+    navigator.vibrate([70, 35, 100]);
+  }
 
+  const canvas = document.getElementById("confettiCanvas");
+  const ctx = canvas.getContext("2d");
+  canvas.width = window.innerWidth;
+  canvas.height = window.innerHeight;
+
+  const pieces = [];
+  const symbols = ["✦","★","✧","●","◆"];
+
+  for(let i=0;i<90;i++){
+    pieces.push({
+      x: canvas.width/2 + (Math.random()-0.5)*140,
+      y: canvas.height*0.38,
+      vx: (Math.random()-0.5)*11,
+      vy: -Math.random()*9-3,
+      size: Math.random()*7+4,
+      gravity: 0.22 + Math.random()*0.12,
+      rotation: Math.random()*Math.PI,
+      rotationSpeed: (Math.random()-0.5)*0.25,
+      life: 100,
+      symbol: symbols[Math.floor(Math.random()*symbols.length)]
+    });
+  }
+
+  let frame=0;
+  function animate(){
+    ctx.clearRect(0,0,canvas.width,canvas.height);
+    let alive=false;
+
+    pieces.forEach(p=>{
+      if(p.life<=0) return;
+      alive=true;
+      p.x += p.vx;
+      p.y += p.vy;
+      p.vy += p.gravity;
+      p.vx *= 0.992;
+      p.rotation += p.rotationSpeed;
+      p.life--;
+
+      ctx.save();
+      ctx.globalAlpha = Math.max(0,p.life/100);
+      ctx.translate(p.x,p.y);
+      ctx.rotate(p.rotation);
+      ctx.font = `${p.size*2}px Arial`;
+      ctx.fillText(p.symbol, -p.size, p.size);
+      ctx.restore();
+    });
+
+    frame++;
+    if(alive && frame<130){
+      requestAnimationFrame(animate);
+    }else{
+      ctx.clearRect(0,0,canvas.width,canvas.height);
+    }
+  }
+  animate();
+}
+</script>
 </body>
 </html>
