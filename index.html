@@ -1,0 +1,38 @@
+<html lang="fa" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+
+<script src="https://developer.eitaa.com/eitaa-web-app.js"></script>
+
+  <!DOCTYPE html>
+<title>آزمون عربی</title>
+</head>
+
+<body>
+
+<h2>آزمون عربی عراقی</h2>
+
+<p>معنی «شِبّاک» چیست؟</p>
+
+<button onclick="check(1)">در</button>
+<button onclick="check(2)">پنجره</button>
+
+<p id="result"></p>
+
+<script>
+
+function check(x){
+
+if(x==2){
+document.getElementById("result").innerHTML="✅ درست";
+}else{
+document.getElementById("result").innerHTML="❌ غلط";
+}
+
+}
+
+</script>
+
+</body>
+</html>
