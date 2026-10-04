@@ -8,9 +8,7 @@
 <script src="https://developer.eitaa.com/eitaa-web-app.js"></script>
 
 <style>
-*{
-  box-sizing:border-box;
-}
+*{box-sizing:border-box}
 
 body{
   margin:0;
@@ -88,11 +86,6 @@ h1{
   text-align:right;
   font-size:16px;
   cursor:pointer;
-  transition:.15s;
-}
-
-.option:hover{
-  background:#f3f6f9;
 }
 
 .option:disabled{
@@ -193,7 +186,7 @@ h1{
 
 <div class="container">
 
-<div class="card">
+<div class="card" id="quizCard">
 
 <h1>آزمون عربی عراقی</h1>
 
@@ -238,7 +231,7 @@ h1{
 <script>
 
 /* =========================
-   آدرس Google Apps Script
+   Google Apps Script
 ========================= */
 
 const GOOGLE_SCRIPT_URL =
@@ -246,7 +239,7 @@ const GOOGLE_SCRIPT_URL =
 
 
 /* =========================
-   اطلاعات کاربر ایتا
+   اطلاعات ایتا
 ========================= */
 
 let eitaaUserId = "";
@@ -255,13 +248,9 @@ function initEitaa(){
 
   try{
 
-    if(
-      window.Eitaa &&
-      window.Eitaa.WebApp
-    ){
+    if(window.Eitaa && window.Eitaa.WebApp){
 
-      const webApp =
-        window.Eitaa.WebApp;
+      const webApp = window.Eitaa.WebApp;
 
       if(typeof webApp.ready === "function"){
         webApp.ready();
@@ -276,25 +265,17 @@ function initEitaa(){
         webApp.initDataUnsafe.user
       ){
 
-        const user =
-          webApp.initDataUnsafe.user;
+        const user = webApp.initDataUnsafe.user;
 
         if(user.id){
-          eitaaUserId =
-            String(user.id);
+          eitaaUserId = String(user.id);
         }
 
-        const userInfo =
-          document.getElementById("userInfo");
+        if(user.first_name){
 
-        if(
-          userInfo &&
-          user.first_name
-        ){
+          document.getElementById("userInfo").textContent =
+            "کاربر: " + user.first_name;
 
-          userInfo.textContent =
-            "کاربر: " +
-            user.first_name;
         }
 
       }
@@ -303,10 +284,7 @@ function initEitaa(){
 
   }catch(error){
 
-    console.log(
-      "خطا در دریافت اطلاعات ایتا:",
-      error
-    );
+    console.log("Eitaa error:",error);
 
   }
 
@@ -314,7 +292,7 @@ function initEitaa(){
 
 
 /* =========================
-   ۴۰ سؤال آزمون
+   ۴۰ سؤال
 ========================= */
 
 const questions = [
@@ -374,19 +352,19 @@ c:1
 },
 
 {
-q:"«قُرِيب» در «مطعم قريب» یعنی چه؟",
+q:"«قُرِيب» یعنی چه؟",
 a:["دور","بزرگ","نزدیک","شلوغ"],
 c:2
 },
 
 {
-q:"«شْكُو مَا شْكُو؟» بیشتر چه مفهومی دارد؟",
+q:"«شْكُو مَا شْكُو؟» یعنی چه؟",
 a:["چه خبر؟","کجایی؟","چقدر است؟","چه می‌خوری؟"],
 c:0
 },
 
 {
-q:"«أرِيد» در گفتار عراقی یعنی چه؟",
+q:"«أرِيد» یعنی چه؟",
 a:["می‌خواهم","می‌دانم","می‌روم","می‌بینم"],
 c:0
 },
@@ -488,14 +466,8 @@ c:1
 },
 
 {
-q:"«اِنْتَظِر» در گفتار عراقی یعنی چه؟",
+q:"«اِسْتَنّى» یعنی چه؟",
 a:["صبر کن / منتظر باش","بیا","برو","بنشین"],
-c:0
-},
-
-{
-q:"برای «صبر کن» در گفتار عراقی کدام طبیعی‌تر است؟",
-a:["اِسْتَنّى","أكُل","أروح","أشوف"],
 c:0
 },
 
@@ -512,7 +484,7 @@ c:0
 },
 
 {
-q:"«ناظور» در محیط درمانی عراقی به چه چیزی اشاره دارد؟",
+q:"«ناظور» در محیط درمانی عراقی یعنی چه؟",
 a:["رادیولوژی","آندوسکوپی / کولونوسکوپی","آزمایش خون","فشارخون"],
 c:1
 },
@@ -548,7 +520,7 @@ c:2
 },
 
 {
-q:"«شْعَلَيْك؟» معمولاً یعنی چه؟",
+q:"«شْعَلَيْك؟» یعنی چه؟",
 a:["چه ربطی به تو دارد؟ / به تو چه؟","کجایی؟","چقدر می‌خواهی؟","چه وقت می‌آیی؟"],
 c:0
 },
@@ -557,13 +529,19 @@ c:0
 q:"«مَا أَدْرِي» یعنی چه؟",
 a:["نمی‌خواهم","نمی‌دانم","نمی‌توانم","نمی‌روم"],
 c:1
+},
+
+{
+q:"«إحنا» یعنی چه؟",
+a:["شما","آنها","ما","من"],
+c:2
 }
 
 ];
 
 
 /* =========================
-   وضعیت آزمون
+   وضعیت
 ========================= */
 
 let current = 0;
@@ -577,13 +555,25 @@ let answered = false;
 
 function renderQuestion(){
 
+  const quiz = document.getElementById("quiz");
+
+  if(!quiz){
+
+    console.error("quiz element not found");
+    return;
+
+  }
+
+  const item = questions[current];
+
+  if(!item){
+
+    console.error("question not found:",current);
+    return;
+
+  }
+
   answered = false;
-
-  const item =
-    questions[current];
-
-  const quiz =
-    document.getElementById("quiz");
 
   quiz.innerHTML = `
 
@@ -600,6 +590,7 @@ function renderQuestion(){
       ${item.a.map((x,i)=>`
 
         <button
+          type="button"
           class="option"
           onclick="answer(${i})">
 
@@ -611,12 +602,10 @@ function renderQuestion(){
 
     </div>
 
-    <div
-      id="feedback"
-      class="feedback">
-    </div>
+    <div id="feedback" class="feedback"></div>
 
     <button
+      type="button"
       id="next"
       class="next"
       onclick="nextQuestion()"
@@ -629,25 +618,17 @@ function renderQuestion(){
       }
 
     </button>
+
   `;
 
-
-  /*
-    درصد پیشرفت:
-    سؤال اول = کمی پیشرفت
-    سؤال آخر = نزدیک ۱۰۰٪
-  */
-
-  document
-    .getElementById("progressBar")
-    .style.width =
-      `${((current + 1) / questions.length) * 100}%`;
+  document.getElementById("progressBar").style.width =
+    `${((current + 1) / questions.length) * 100}%`;
 
 }
 
 
 /* =========================
-   پاسخ به سؤال
+   پاسخ
 ========================= */
 
 function answer(index){
@@ -656,26 +637,19 @@ function answer(index){
 
   answered = true;
 
-  const item =
-    questions[current];
+  const item = questions[current];
 
   const buttons =
     document.querySelectorAll(".option");
 
-
   buttons.forEach(
-    b => b.disabled = true
+    button => button.disabled = true
   );
 
-
-  buttons[item.c]
-    .classList
-    .add("correct");
-
+  buttons[item.c].classList.add("correct");
 
   const feedback =
     document.getElementById("feedback");
-
 
   if(index === item.c){
 
@@ -691,9 +665,7 @@ function answer(index){
 
   }else{
 
-    buttons[index]
-      .classList
-      .add("wrong");
+    buttons[index].classList.add("wrong");
 
     feedback.textContent =
       "✗ پاسخ نادرست — پاسخ صحیح مشخص شده است";
@@ -703,10 +675,7 @@ function answer(index){
 
   }
 
-
-  document
-    .getElementById("next")
-    .disabled = false;
+  document.getElementById("next").disabled = false;
 
 }
 
@@ -721,7 +690,6 @@ function nextQuestion(){
 
   current++;
 
-
   if(current < questions.length){
 
     renderQuestion();
@@ -734,18 +702,14 @@ function nextQuestion(){
   }else{
 
     document
-      .querySelector(
-        ".container > .card:first-child"
-      )
+      .getElementById("quizCard")
       .classList
       .add("hidden");
-
 
     document
       .getElementById("result")
       .classList
       .remove("hidden");
-
 
     const correct =
       Math.round(score / 0.5);
@@ -753,41 +717,19 @@ function nextQuestion(){
     const wrong =
       questions.length - correct;
 
-
     const percent =
       Math.round(
         (correct / questions.length) * 100
       );
 
+    document.getElementById("score").textContent =
+      `${score.toFixed(1)} از 20`;
 
-    document
-      .getElementById("score")
-      .textContent =
-        `${score.toFixed(1)} از 20`;
+    document.getElementById("resultText").textContent =
+      `تعداد پاسخ‌های صحیح: ${correct} از ${questions.length}`;
 
-
-    document
-      .getElementById("resultText")
-      .textContent =
-        `تعداد پاسخ‌های صحیح: ${correct} از ${questions.length}`;
-
-
-    document
-      .getElementById("percentText")
-      .textContent =
-        `درصد موفقیت: ${percent}٪`;
-
-
-    document
-      .getElementById("progressBar")
-      .style.width = "100%";
-
-
-    window.scrollTo({
-      top:0,
-      behavior:"smooth"
-    });
-
+    document.getElementById("percentText").textContent =
+      `درصد موفقیت: ${percent}٪`;
 
     saveResult(
       score,
@@ -802,7 +744,7 @@ function nextQuestion(){
 
 
 /* =========================
-   ثبت نتیجه در Google Sheets
+   ذخیره نتیجه
 ========================= */
 
 function saveResult(
@@ -815,56 +757,44 @@ function saveResult(
   const status =
     document.getElementById("saveStatus");
 
-
   if(!eitaaUserId){
 
     status.textContent =
       "شناسه ایتا دریافت نشد؛ آزمون در حالت وب اجرا شده است.";
 
     return;
-  }
 
+  }
 
   const data = {
 
-    userId:
-      eitaaUserId,
+    userId:eitaaUserId,
 
-    score:
-      finalScore.toFixed(1),
+    score:finalScore.toFixed(1),
 
-    percent:
-      percent,
+    percent:percent,
 
-    correct:
-      correct,
+    correct:correct,
 
-    wrong:
-      wrong
+    wrong:wrong
 
   };
-
 
   fetch(
     GOOGLE_SCRIPT_URL,
     {
       method:"POST",
-
       mode:"no-cors",
-
       headers:{
-        "Content-Type":
-          "text/plain;charset=utf-8"
+        "Content-Type":"text/plain;charset=utf-8"
       },
-
-      body:
-        JSON.stringify(data)
+      body:JSON.stringify(data)
     }
   )
   .then(()=>{
 
     status.textContent =
-      "✓ نتیجه آزمون با موفقیت ارسال شد.";
+      "✓ نتیجه آزمون ارسال شد.";
 
   })
   .catch(error=>{
@@ -886,28 +816,20 @@ function saveResult(
 function restartQuiz(){
 
   current = 0;
-
   score = 0;
-
   answered = false;
-
 
   document
     .getElementById("result")
     .classList
     .add("hidden");
 
-
   document
-    .querySelector(
-      ".container > .card:first-child"
-    )
+    .getElementById("quizCard")
     .classList
     .remove("hidden");
 
-
   renderQuestion();
-
 
   window.scrollTo({
     top:0,
@@ -923,36 +845,34 @@ function restartQuiz(){
 
 function celebrate(){
 
-  /*
-    ویبره
-  */
+  try{
 
-  if(navigator.vibrate){
+    if(navigator.vibrate){
 
-    navigator.vibrate([
-      60,
-      25,
-      80
-    ]);
+      navigator.vibrate([
+        60,
+        25,
+        80
+      ]);
 
-  }
+    }
+
+  }catch(e){}
 
 
   const canvas =
-    document.getElementById(
-      "confettiCanvas"
-    );
+    document.getElementById("confettiCanvas");
+
+  if(!canvas) return;
 
   const ctx =
     canvas.getContext("2d");
-
 
   canvas.width =
     window.innerWidth;
 
   canvas.height =
     window.innerHeight;
-
 
   const colors = [
     "#ff1744",
@@ -964,40 +884,29 @@ function celebrate(){
     "#ff00c8"
   ];
 
-
   const pieces = [];
-
 
   for(let i=0;i<75;i++){
 
     pieces.push({
 
-      x:
-        canvas.width / 2,
+      x:canvas.width/2,
 
-      y:
-        canvas.height * 0.38,
+      y:canvas.height*0.38,
 
-      vx:
-        (Math.random()-0.5)*18,
+      vx:(Math.random()-0.5)*18,
 
-      vy:
-        -Math.random()*13-5,
+      vy:-Math.random()*13-5,
 
-      size:
-        Math.random()*7+4,
+      size:Math.random()*7+4,
 
-      gravity:
-        0.35 + Math.random()*0.2,
+      gravity:0.35+Math.random()*0.2,
 
-      rotation:
-        Math.random()*Math.PI,
+      rotation:Math.random()*Math.PI,
 
-      rotationSpeed:
-        (Math.random()-0.5)*0.5,
+      rotationSpeed:(Math.random()-0.5)*0.5,
 
-      life:
-        60 + Math.random()*20,
+      life:70,
 
       color:
         colors[
@@ -1010,16 +919,13 @@ function celebrate(){
 
   }
 
-
   const start =
     performance.now();
-
 
   function animate(now){
 
     const elapsed =
       now - start;
-
 
     ctx.clearRect(
       0,
@@ -1028,9 +934,7 @@ function celebrate(){
       canvas.height
     );
 
-
     let alive = false;
-
 
     pieces.forEach(p=>{
 
@@ -1038,45 +942,23 @@ function celebrate(){
 
       alive = true;
 
-
       p.x += p.vx;
-
       p.y += p.vy;
-
       p.vy += p.gravity;
-
       p.vx *= 0.985;
-
-      p.rotation +=
-        p.rotationSpeed;
-
+      p.rotation += p.rotationSpeed;
       p.life--;
-
 
       ctx.save();
 
-
       ctx.globalAlpha =
-        Math.max(
-          0,
-          p.life / 70
-        );
+        Math.max(0,p.life/70);
 
-
-      ctx.translate(
-        p.x,
-        p.y
-      );
-
-
-      ctx.rotate(
-        p.rotation
-      );
-
+      ctx.translate(p.x,p.y);
+      ctx.rotate(p.rotation);
 
       ctx.fillStyle =
         p.color;
-
 
       ctx.fillRect(
         -p.size/2,
@@ -1085,20 +967,13 @@ function celebrate(){
         p.size
       );
 
-
       ctx.restore();
 
     });
 
+    if(alive && elapsed < 1000){
 
-    if(
-      alive &&
-      elapsed < 1000
-    ){
-
-      requestAnimationFrame(
-        animate
-      );
+      requestAnimationFrame(animate);
 
     }else{
 
@@ -1113,23 +988,25 @@ function celebrate(){
 
   }
 
-
-  requestAnimationFrame(
-    animate
-  );
+  requestAnimationFrame(animate);
 
 }
 
 
 /* =========================
-   شروع برنامه
+   اجرای برنامه
 ========================= */
 
-console.log("مرحله 1");
-initEitaa();
-console.log("مرحله 2");
-renderQuestion();
-console.log("مرحله 3");
+window.addEventListener(
+  "DOMContentLoaded",
+  function(){
+
+    initEitaa();
+
+    renderQuestion();
+
+  }
+);
 
 </script>
 
