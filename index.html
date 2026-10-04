@@ -1,40 +1,379 @@
-const SHEET_ID = "1JqjExw9fLtWglyYnxuT2w8PdIC8iYNdULTlXZBvKG8g";
+```html
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>آزمون واژگان عربی عراقی</title>
 
-function doPost(e) {
-  try {
+<style>
+*{box-sizing:border-box}
 
-    const spreadsheet = SpreadsheetApp.openById(SHEET_ID);
-    const sheet = spreadsheet.getSheets()[0];
+body{
+  margin:0;
+  padding:20px;
+  font-family:Tahoma,Arial,sans-serif;
+  background:linear-gradient(135deg,#eef2ff,#f8fafc);
+  color:#222
+}
 
-    const data = JSON.parse(e.postData.contents);
+.container{
+  max-width:600px;
+  margin:auto
+}
 
-    const userId = String(data.userId || "").trim();
+h1{
+  text-align:center;
+  font-size:23px;
+  margin:10px 0 8px
+}
 
-    if (!userId) {
-      return jsonResponse({
-        success: false,
-        error: "شناسه ایتا دریافت نشد"
-      });
-    }
+.user{
+  text-align:center;
+  color:#666;
+  margin-bottom:18px
+}
 
-    // بررسی اینکه این کاربر قبلاً آزمون داده یا نه
-    const lastRow = sheet.getLastRow();
+.card{
+  background:white;
+  border-radius:20px;
+  padding:22px;
+  box-shadow:0 5px 20px rgba(0,0,0,.10)
+}
 
-    if (lastRow >= 2) {
+.progress{
+  text-align:center;
+  color:#666;
+  margin-bottom:15px
+}
 
-      const userIds =
-        sheet.getRange(2, 1, lastRow - 1, 1)
-        .getValues();
+.question{
+  font-size:20px;
+  font-weight:bold;
+  line-height:1.8;
+  margin-bottom:20px
+}
 
-      for (let i = 0; i < userIds.length; i++) {
+.option{
+  width:100%;
+  border:none;
+  border-radius:14px;
+  padding:15px;
+  margin:7px 0;
+  background:#f1f5f9;
+  font-size:17px;
+  cursor:pointer;
+  text-align:right;
+  transition:.2s
+}
 
-        if (String(userIds[i][0]).trim() === userId) {
+.option:hover{
+  background:#e2e8f0
+}
 
-          return jsonResponse({
-            success: false,
-            alreadyDone: true,
-            message: "این کاربر قبلاً آزمون را انجام داده است"
-          });
+.option.correct{
+  background:#22c55e !important;
+  color:white
+}
+
+.option.wrong{
+  background:#ef4444 !important;
+  color:white
+}
+
+.option.disabled{
+  pointer-events:none
+}
+
+.result{
+  display:none;
+  text-align:center;
+  background:white;
+  border-radius:20px;
+  padding:25px;
+  box-shadow:0 5px 20px rgba(0,0,0,.10)
+}
+
+.result h2{
+  margin-top:0
+}
+
+.score{
+  font-size:34px;
+  font-weight:bold;
+  margin:15px 0
+}
+
+.final-details{
+  line-height:2;
+  font-size:17px
+}
+
+.wrong-title{
+  margin-top:25px;
+  margin-bottom:15px;
+  font-size:18px;
+  font-weight:bold
+}
+
+.wrong-word{
+  margin:8px 0;
+  padding:10px 14px;
+  background:#fff1f2;
+  border-radius:12px;
+  text-align:right;
+  font-size:17px;
+  line-height:1.8
+}
+
+.wrong-word b{
+  color:#222
+}
+
+.perfect-message{
+  margin-top:25px;
+  padding:18px 12px;
+  background:#f0fdf4;
+  border-radius:15px;
+  font-size:18px;
+  line-height:2;
+}
+
+.perfect-message .arabic{
+  font-weight:bold;
+  direction:rtl;
+  margin-bottom:8px;
+}
+
+.save-status{
+  margin-top:20px;
+  color:#555;
+  line-height:1.8
+}
+
+.confetti{
+  position:fixed;
+  inset:0;
+  pointer-events:none;
+  z-index:9999
+}
+
+.confetti span{
+  position:absolute;
+  width:9px;
+  height:18px;
+  animation:fall 1s linear forwards
+}
+
+@keyframes fall{
+  from{
+    transform:translateY(-30px) rotate(0deg);
+    opacity:1
+  }
+  to{
+    transform:translateY(100vh) rotate(720deg);
+    opacity:0
+  }
+}
+
+@media(max-width:500px){
+  body{
+    padding:12px
+  }
+
+  .card{
+    padding:18px
+  }
+
+  .question{
+    font-size:18px
+  }
+
+  .option{
+    font-size:16px
+  }
+}
+</style>
+</head>
+
+<body>
+
+<div class="container">
+
+<h1>آزمون واژگان عربی عراقی</h1>
+
+<div id="userInfo" class="user"></div>
+
+<div id="quizCard" class="card">
+
+  <div id="progress" class="progress"></div>
+
+  <div id="question" class="question"></div>
+
+  <div id="options"></div>
+
+</div>
+
+
+<div id="result" class="result">
+
+  <h2>آزمون به پایان رسید</h2>
+
+  <div id="finalScore" class="score"></div>
+
+  <div id="finalDetails" class="final-details"></div>
+
+  <div id="wrongAnswers"></div>
+
+  <div id="saveStatus" class="save-status">
+    نتیجه در حال ارسال است...
+  </div>
+
+</div>
+
+</div>
+
+
+<script>
+
+/* =========================
+   اتصال Google Sheets
+========================= */
+
+const GOOGLE_SCRIPT_URL="https://script.google.com/macros/s/AKfycbwlQiJOCORFZaTSzNDJYWyZ7jh96OM3zrTcnMz90-1PqGqRqiVJLWSH152MxuW3QNua/exec";
+
+
+/* =========================
+   متغیرها
+========================= */
+
+let current=0;
+let score=0;
+let correctCount=0;
+let wrongCount=0;
+let eitaaUserId="";
+
+let wrongAnswers=[];
+
+
+/* =========================
+   سؤالات
+========================= */
+
+const questions = [
+
+{q:"«شُوَكِت» یعنی چه؟",a:["کجا","کی / چه وقت","چقدر","چرا"],c:1},
+
+{q:"«وَيْن» یعنی چه؟",a:["کجا","چرا","کی","چطور"],c:0},
+
+{q:"«شْلَوْنَك؟» یعنی چه؟",a:["اسمت چیست؟","کجایی؟","حالت چطوره؟","چند سالته؟"],c:2},
+
+{q:"«شِسْمَك؟» یعنی چه؟",a:["کجایی؟","اسمت چیه؟","چی می‌خوری؟","کی میای؟"],c:1},
+
+{q:"«هَسَّه» یعنی چه؟",a:["دیروز","فردا","الان / همین حالا","بعداً"],c:2},
+
+{q:"«بَچِر» یعنی چه؟",a:["امروز","فردا","دیشب","هفته بعد"],c:1},
+
+{q:"«أَمْس» یعنی چه؟",a:["امروز","فردا","دیروز","الان"],c:2},
+
+{q:"«هِنانه» یعنی چه؟",a:["آنجا","اینجا","بالا","پایین"],c:1},
+
+{q:"«هِنَاك» یعنی چه؟",a:["اینجا","آنجا","کنار","داخل"],c:1},
+
+{q:"«قُرِيب» یعنی چه؟",a:["دور","بزرگ","نزدیک","شلوغ"],c:2},
+
+{q:"«شْكُو مَا شْكُو؟» یعنی چه؟",a:["چه خبر؟","کجایی؟","چقدر است؟","چه می‌خوری؟"],c:0},
+
+{q:"«أرِيد» یعنی چه؟",a:["می‌خواهم","می‌دانم","می‌روم","می‌بینم"],c:0},
+
+{q:"«مَا أَرِيد» یعنی چه؟",a:["نمی‌دانم","نمی‌خواهم","نمی‌روم","نمی‌بینم"],c:1},
+
+{q:"«أكْدَر» یعنی چه؟",a:["می‌توانم","می‌خواهم","می‌دانم","می‌گیرم"],c:0},
+
+{q:"«مَا أَكْدَر» یعنی چه؟",a:["نمی‌خواهم","نمی‌توانم","نمی‌دانم","نمی‌روم"],c:1},
+
+{q:"«أحچي» یعنی چه؟",a:["می‌خورم","صحبت می‌کنم","می‌خوابم","می‌نشینم"],c:1},
+
+{q:"«جاي أَحچي» یعنی چه؟",a:["صحبت کردم","دارم صحبت می‌کنم","صحبت خواهم کرد","صحبت نکن"],c:1},
+
+{q:"«راح أروح» یعنی چه؟",a:["رفتم","دارم می‌روم","خواهم رفت","نرو"],c:2},
+
+{q:"«لا تِروح» یعنی چه؟",a:["نرو","نرفتم","می‌روم","برو"],c:0},
+
+{q:"«شَاف» یعنی چه؟",a:["گفت","دید","خرید","فروخت"],c:1},
+
+{q:"«بَاع» یعنی چه؟",a:["خرید","فروخت","دید","گفت"],c:1},
+
+{q:"«رَاح» یعنی چه؟",a:["آمد","رفت","خوابید","ترسید"],c:1},
+
+{q:"«نَام» یعنی چه؟",a:["خوابید","ایستاد","رفت","خورد"],c:0},
+
+{q:"«خَاف» یعنی چه؟",a:["خندید","ترسید","دوید","گفت"],c:1},
+
+{q:"«گَام» در عراقی یعنی چه؟",a:["بلند شد / از جا بلند شد","خوابید","فروخت","پرسید"],c:0},
+
+{q:"«گَال» یعنی چه؟",a:["گفت","دید","آمد","گرفت"],c:0},
+
+{q:"«صَار» یعنی چه؟",a:["شد / تبدیل شد","رفت","خورد","خرید"],c:0},
+
+{q:"«سَوّي» یعنی چه؟",a:["بیا","انجام بده / درست کن","بخواب","برو"],c:1},
+
+{q:"«اِسْتَنّى» یعنی چه؟",a:["صبر کن / منتظر باش","بیا","برو","بنشین"],c:0},
+
+{q:"«فَحْص دَم» یعنی چه؟",a:["عکس‌برداری","آزمایش خون","آزمایش ادرار","سونوگرافی"],c:1},
+
+{q:"«أَسَوّي فَحْص دَم» یعنی چه؟",a:["آزمایش خون می‌دهم / انجام می‌دهم","خون می‌فروشم","دکتر می‌شوم","دارو می‌خرم"],c:0},
+
+{q:"«ناظور» در محیط درمانی عراقی یعنی چه؟",a:["رادیولوژی","آندوسکوپی / کولونوسکوپی","آزمایش خون","فشارخون"],c:1},
+
+{q:"«سُونار» یعنی چه؟",a:["سونوگرافی","تزریق","آندوسکوپی","آزمایش خون"],c:0},
+
+{q:"«إبْرَة» یعنی چه؟",a:["قرص","آمپول / سوزن","پماد","باند"],c:1},
+
+{q:"«وِين أَكُو أَكْل عِرَاقِي زَيْن؟» یعنی چه؟",a:["غذای عراقی خوب کجاست؟","غذای عراقی چقدر است؟","چه کسی غذای عراقی می‌پزد؟","غذای عراقی ندارید؟"],c:0},
+
+{q:"«مَطْعَم» یعنی چه؟",a:["داروخانه","رستوران","بیمارستان","آزمایشگاه"],c:1},
+
+{q:"«شِگَد؟» یعنی چه؟",a:["کجا؟","چرا؟","چقدر؟","کی؟"],c:2},
+
+{q:"«شْعَلَيْك؟» یعنی چه؟",a:["چه ربطی به تو دارد؟ / به تو چه؟","کجایی؟","چقدر می‌خواهی؟","چه وقت می‌آیی؟"],c:0},
+
+{q:"«مَا أَدْرِي» یعنی چه؟",a:["نمی‌خواهم","نمی‌دانم","نمی‌توانم","نمی‌روم"],c:1},
+
+{q:"«إحنا» یعنی چه؟",a:["شما","آنها","ما","من"],c:2}
+
+];
+
+
+/* =========================
+   اتصال به ایتا
+========================= */
+
+function initEitaa(){
+
+  try{
+
+    if(window.Eitaa && window.Eitaa.WebApp){
+
+      const webApp=window.Eitaa.WebApp;
+
+      if(typeof webApp.ready==="function")
+        webApp.ready();
+
+      if(typeof webApp.expand==="function")
+        webApp.expand();
+
+      if(webApp.initDataUnsafe && webApp.initDataUnsafe.user){
+
+        const user=webApp.initDataUnsafe.user;
+
+        if(user.id)
+          eitaaUserId=String(user.id);
+
+        if(user.first_name){
+
+          document.getElementById("userInfo").textContent=
+            "کاربر: "+user.first_name;
 
         }
 
@@ -42,109 +381,356 @@ function doPost(e) {
 
     }
 
-    // ثبت نتیجه جدید
-    sheet.appendRow([
-      userId,
-      data.score || "",
-      data.percent || "",
-      data.correct || "",
-      data.wrong || "",
-      new Date()
-    ]);
+  }catch(error){
 
-    SpreadsheetApp.flush();
-
-    return jsonResponse({
-      success: true,
-      message: "نتیجه با موفقیت ثبت شد",
-      row: sheet.getLastRow()
-    });
-
-  } catch (error) {
-
-    return jsonResponse({
-      success: false,
-      error: error.toString()
-    });
+    console.log("Eitaa error:",error);
 
   }
+
 }
 
 
-function doGet(e) {
+/* =========================
+   نمایش سؤال
+========================= */
 
-  try {
+function renderQuestion(){
 
-    const spreadsheet =
-      SpreadsheetApp.openById(SHEET_ID);
+  const q=questions[current];
 
-    const sheet =
-      spreadsheet.getSheets()[0];
+  document.getElementById("progress").textContent=
+    "سؤال "+(current+1)+" از "+questions.length;
 
-    const userId =
-      e && e.parameter && e.parameter.userId
-        ? String(e.parameter.userId).trim()
-        : "";
+  document.getElementById("question").textContent=q.q;
 
-    let alreadyDone = false;
+  const options=document.getElementById("options");
 
-    if (userId && sheet.getLastRow() >= 2) {
+  options.innerHTML="";
 
-      const userIds =
-        sheet
-        .getRange(2, 1, sheet.getLastRow() - 1, 1)
-        .getValues();
+  q.a.forEach(function(answer,index){
 
-      for (let i = 0; i < userIds.length; i++) {
+    const button=document.createElement("button");
 
-        if (String(userIds[i][0]).trim() === userId) {
+    button.className="option";
 
-          alreadyDone = true;
-          break;
+    button.textContent=answer;
 
-        }
+    button.onclick=function(){
 
-      }
+      answerQuestion(index,button);
+
+    };
+
+    options.appendChild(button);
+
+  });
+
+}
+
+
+/* =========================
+   پاسخ به سؤال
+========================= */
+
+function answerQuestion(selected,selectedButton){
+
+  const q=questions[current];
+
+  const buttons=document.querySelectorAll(".option");
+
+  buttons.forEach(function(button){
+
+    button.classList.add("disabled");
+
+  });
+
+
+  if(selected===q.c){
+
+    selectedButton.classList.add("correct");
+
+    score+=0.5;
+
+    correctCount++;
+
+    navigator.vibrate?.(120);
+
+    showConfetti();
+
+  }else{
+
+    selectedButton.classList.add("wrong");
+
+    buttons[q.c].classList.add("correct");
+
+    wrongCount++;
+
+
+    /* ذخیره فقط سؤال و معنی درست */
+
+    wrongAnswers.push({
+
+      word:q.q,
+
+      correctAnswer:q.a[q.c]
+
+    });
+
+
+    navigator.vibrate?.([80,50,80]);
+
+  }
+
+
+  setTimeout(function(){
+
+    current++;
+
+    if(current<questions.length){
+
+      renderQuestion();
+
+    }else{
+
+      finishQuiz();
 
     }
 
-    return jsonResponse({
+  },900);
 
-      connected: true,
+}
 
-      alreadyDone: alreadyDone,
 
-      spreadsheet: spreadsheet.getName(),
+/* =========================
+   پایان آزمون
+========================= */
 
-      sheet: sheet.getName(),
+function finishQuiz(){
 
-      rows: sheet.getLastRow()
+  document.getElementById("quizCard").style.display="none";
+
+  document.getElementById("result").style.display="block";
+
+
+  const percent=
+    Math.round((correctCount/questions.length)*100);
+
+
+  document.getElementById("finalScore").textContent=
+    score.toFixed(1)+" از 20";
+
+
+  document.getElementById("finalDetails").innerHTML=
+    "درست: "+correctCount+
+    "<br>غلط: "+wrongCount+
+    "<br>درصد: "+percent+"%";
+
+
+  const wrongBox=
+    document.getElementById("wrongAnswers");
+
+
+  /* اگر همه درست باشد */
+
+  if(wrongAnswers.length===0){
+
+    wrongBox.innerHTML=
+      '<div class="perfect-message">'+
+
+      '<div class="arabic">«خذ خطوة صغيرة نحو أحلامك كل يوم...»</div>'+
+
+      '<div>هر روز یک قدم حتی کوچک به سمت رویاهات بردار... 🌱</div>'+
+
+      '</div>';
+
+  }else{
+
+
+    /* اگر پاسخ غلط وجود داشته باشد */
+
+    let html=
+      '<div class="wrong-title">'+
+      'این کلمات رو بلد نبودی؛ ازشون اسکرین‌شات بگیر 📸'+
+      '</div>';
+
+
+    wrongAnswers.forEach(function(item){
+
+      /*
+        فقط واژه و معنی درست نمایش داده می‌شود
+        پاسخ فرد نمایش داده نمی‌شود
+      */
+
+      let word=item.word;
+
+      /*
+        حذف علامت‌های «» و عبارت «یعنی چه؟»
+        برای اینکه خروجی کوتاه و مناسب اسکرین‌شات باشد
+      */
+
+      word=word
+        .replace(/«/g,"")
+        .replace(/»/g,"")
+        .replace(/ یعنی چه؟/g,"")
+        .replace(/ در محیط درمانی عراقی/g,"");
+
+
+      html+=
+        '<div class="wrong-word">'+
+        '<b>'+word+'</b>'+
+        ': '+
+        item.correctAnswer+
+        '</div>';
 
     });
 
-  } catch (error) {
 
-    return jsonResponse({
-
-      connected: false,
-
-      error: error.toString()
-
-    });
+    wrongBox.innerHTML=html;
 
   }
 
+
+  saveResult(
+    score,
+    percent,
+    correctCount,
+    wrongCount
+  );
+
+}
+
+
+/* =========================
+   ارسال نتیجه به Google Sheets
+========================= */
+
+function saveResult(finalScore,percent,correct,wrong){
+
+  const status=
+    document.getElementById("saveStatus");
+
+
+  if(!eitaaUserId){
+
+    status.textContent=
+      "شناسه ایتا دریافت نشد؛ آزمون در حالت وب اجرا شده است.";
+
+    return;
+
+  }
+
+
+  const data={
+
+    userId:eitaaUserId,
+
+    score:finalScore.toFixed(1),
+
+    percent:percent,
+
+    correct:correct,
+
+    wrong:wrong
+
+  };
+
+
+  fetch(GOOGLE_SCRIPT_URL,{
+
+    method:"POST",
+
+    mode:"no-cors",
+
+    headers:{
+      "Content-Type":"text/plain;charset=utf-8"
+    },
+
+    body:JSON.stringify(data)
+
+  })
+
+  .then(function(){
+
+    status.textContent=
+      "✓ نتیجه آزمون ارسال شد.";
+
+  })
+
+  .catch(function(error){
+
+    console.error(error);
+
+    status.textContent=
+      "⚠️ ارسال نتیجه انجام نشد.";
+
+  });
+
 }
 
 
-function jsonResponse(data) {
+/* =========================
+   افکت موفقیت
+========================= */
 
-  return ContentService
-    .createTextOutput(
-      JSON.stringify(data)
-    )
-    .setMimeType(
-      ContentService.MimeType.JSON
-    );
+function showConfetti(){
+
+  const container=
+    document.createElement("div");
+
+  container.className="confetti";
+
+
+  for(let i=0;i<35;i++){
+
+    const piece=
+      document.createElement("span");
+
+    piece.style.left=
+      Math.random()*100+"%";
+
+    piece.style.top=
+      Math.random()*20+"%";
+
+    piece.style.background=
+      "hsl("+Math.random()*360+",90%,55%)";
+
+    piece.style.transform=
+      "rotate("+Math.random()*360+"deg)";
+
+    container.appendChild(piece);
+
+  }
+
+
+  document.body.appendChild(container);
+
+
+  setTimeout(function(){
+
+    container.remove();
+
+  },1100);
 
 }
+
+
+/* =========================
+   شروع آزمون
+========================= */
+
+window.addEventListener(
+  "DOMContentLoaded",
+  function(){
+
+    initEitaa();
+
+    renderQuestion();
+
+  }
+);
+
+</script>
+
+</body>
+</html>
+```
