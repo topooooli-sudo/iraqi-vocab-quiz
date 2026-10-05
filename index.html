@@ -1,247 +1,663 @@
 ```html
 <!DOCTYPE html>
 <html lang="fa" dir="rtl">
+
 <head>
+
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width,initial-scale=1.0">
-  <script src="https://developer.eitaa.com/eitaa-web-app.js"></script>
+
+<meta name="viewport"
+content="width=device-width,initial-scale=1.0">
+
+<script src="https://developer.eitaa.com/eitaa-web-app.js"></script>
+
 <title>آزمون واژگان عربی عراقی</title>
 
 <style>
-*{box-sizing:border-box}
+
+*{
+  box-sizing:border-box
+}
 
 body{
+
   margin:0;
   padding:20px;
+
   font-family:Tahoma,Arial,sans-serif;
-  background:linear-gradient(135deg,#eef2ff,#f8fafc);
-  color:#222
+
+  background:
+    linear-gradient(
+      135deg,
+      #eef2ff,
+      #f8fafc
+    );
+
+  color:#222;
+
+  overflow-x:hidden;
 }
 
 .container{
+
   max-width:600px;
-  margin:auto
+  margin:auto;
 }
 
 h1{
+
   text-align:center;
+
   font-size:23px;
-  margin:10px 0 8px
+
+  margin:10px 0 8px;
 }
 
 .user{
+
   text-align:center;
+
   color:#666;
-  margin-bottom:18px
+
+  margin-bottom:18px;
 }
 
-.card{
+
+/* =========================
+   صفحه ورود نام دانشجو
+========================= */
+
+#startScreen{
+
   background:white;
+
   border-radius:20px;
+
+  padding:25px;
+
+  box-shadow:
+    0 5px 20px rgba(0,0,0,.10);
+
+  text-align:center;
+}
+
+#startScreen h2{
+
+  margin-top:0;
+}
+
+#studentName{
+
+  width:100%;
+
+  padding:14px;
+
+  border:1px solid #ddd;
+
+  border-radius:12px;
+
+  font-size:17px;
+
+  text-align:right;
+
+  margin:15px 0;
+
+  outline:none;
+}
+
+#studentName:focus{
+
+  border-color:#6366f1;
+}
+
+.start-button{
+
+  width:100%;
+
+  border:none;
+
+  border-radius:14px;
+
+  padding:15px;
+
+  background:#4f46e5;
+
+  color:white;
+
+  font-size:18px;
+
+  cursor:pointer;
+}
+
+.start-button:active{
+
+  transform:scale(.98);
+}
+
+.name-error{
+
+  color:#ef4444;
+
+  margin-bottom:12px;
+
+  display:none;
+}
+
+
+/* =========================
+   کارت آزمون
+========================= */
+
+.card{
+
+  background:white;
+
+  border-radius:20px;
+
   padding:22px;
-  box-shadow:0 5px 20px rgba(0,0,0,.10)
+
+  box-shadow:
+    0 5px 20px rgba(0,0,0,.10);
 }
 
 .progress{
+
   text-align:center;
+
   color:#666;
-  margin-bottom:15px
+
+  margin-bottom:15px;
 }
 
 .question{
+
   font-size:20px;
+
   font-weight:bold;
+
   line-height:1.8;
-  margin-bottom:20px
+
+  margin-bottom:20px;
 }
 
 .option{
+
   width:100%;
+
   border:none;
+
   border-radius:14px;
+
   padding:15px;
+
   margin:7px 0;
+
   background:#f1f5f9;
+
   font-size:17px;
+
   cursor:pointer;
+
   text-align:right;
-  transition:.2s
+
+  transition:.2s;
 }
 
 .option:hover{
-  background:#e2e8f0
+
+  background:#e2e8f0;
 }
 
 .option.correct{
+
   background:#22c55e !important;
-  color:white
+
+  color:white;
 }
 
 .option.wrong{
+
   background:#ef4444 !important;
-  color:white
+
+  color:white;
 }
 
 .option.disabled{
-  pointer-events:none
+
+  pointer-events:none;
 }
 
+
+/* =========================
+   نتیجه
+========================= */
+
 .result{
+
   display:none;
+
   text-align:center;
+
   background:white;
+
   border-radius:20px;
+
   padding:25px;
-  box-shadow:0 5px 20px rgba(0,0,0,.10)
+
+  box-shadow:
+    0 5px 20px rgba(0,0,0,.10);
 }
 
 .result h2{
-  margin-top:0
+
+  margin-top:0;
 }
 
 .score{
+
   font-size:34px;
+
   font-weight:bold;
-  margin:15px 0
+
+  margin:15px 0;
 }
 
 .final-details{
+
   line-height:2;
-  font-size:17px
+
+  font-size:17px;
 }
 
 .wrong-title{
+
   margin-top:25px;
+
   margin-bottom:15px;
+
   font-size:18px;
-  font-weight:bold
+
+  font-weight:bold;
 }
 
 .wrong-word{
+
   margin:8px 0;
+
   padding:10px 14px;
+
   background:#fff1f2;
+
   border-radius:12px;
+
   text-align:right;
+
   font-size:17px;
-  line-height:1.8
+
+  line-height:1.8;
 }
 
 .wrong-word b{
-  color:#222
+
+  color:#222;
 }
 
 .perfect-message{
+
   margin-top:25px;
+
   padding:18px 12px;
+
   background:#f0fdf4;
+
   border-radius:15px;
+
   font-size:18px;
+
   line-height:2;
 }
 
 .perfect-message .arabic{
+
   font-weight:bold;
+
   direction:rtl;
+
   margin-bottom:8px;
 }
 
 .save-status{
+
   margin-top:20px;
+
   color:#555;
-  line-height:1.8
+
+  line-height:1.8;
 }
 
-.confetti{
+
+/* =========================
+   قلب باران
+========================= */
+
+.heart-rain{
+
   position:fixed;
+
   inset:0;
+
   pointer-events:none;
-  z-index:9999
+
+  overflow:hidden;
+
+  z-index:9998;
 }
 
-.confetti span{
+.heart{
+
   position:absolute;
-  width:9px;
-  height:18px;
-  animation:fall 1s linear forwards
+
+  top:-50px;
+
+  font-size:25px;
+
+  animation:
+    heartFall linear forwards;
+
+  user-select:none;
 }
 
-@keyframes fall{
-  from{
-    transform:translateY(-30px) rotate(0deg);
-    opacity:1
+@keyframes heartFall{
+
+  0%{
+
+    transform:
+      translateY(-50px)
+      rotate(0deg);
+
+    opacity:1;
   }
-  to{
-    transform:translateY(100vh) rotate(720deg);
-    opacity:0
+
+  100%{
+
+    transform:
+      translateY(110vh)
+      rotate(360deg);
+
+    opacity:.9;
   }
 }
+
+
+/* =========================
+   نورافشانی
+========================= */
+
+.light-show{
+
+  position:fixed;
+
+  inset:0;
+
+  pointer-events:none;
+
+  z-index:9997;
+
+  animation:
+    lightFlash .7s infinite;
+}
+
+@keyframes lightFlash{
+
+  0%{
+
+    box-shadow:
+      inset 0 0 0 0
+      rgba(255,255,255,0);
+  }
+
+  25%{
+
+    box-shadow:
+      inset 0 0 80px 20px
+      rgba(255,255,255,.75);
+  }
+
+  50%{
+
+    box-shadow:
+      inset 0 0 0 0
+      rgba(255,255,255,0);
+  }
+
+  75%{
+
+    box-shadow:
+      inset 0 0 100px 30px
+      rgba(255,255,255,.65);
+  }
+
+  100%{
+
+    box-shadow:
+      inset 0 0 0 0
+      rgba(255,255,255,0);
+  }
+}
+
+
+/* =========================
+   ذرات نور
+========================= */
+
+.sparkle{
+
+  position:fixed;
+
+  width:8px;
+
+  height:8px;
+
+  border-radius:50%;
+
+  background:white;
+
+  pointer-events:none;
+
+  z-index:9999;
+
+  box-shadow:
+    0 0 10px 4px white;
+
+  animation:
+    sparkleAnim .9s linear forwards;
+}
+
+@keyframes sparkleAnim{
+
+  0%{
+
+    transform:
+      scale(.2)
+      translate(0,0);
+
+    opacity:1;
+  }
+
+  100%{
+
+    transform:
+      scale(1.5)
+      translate(
+        var(--dx),
+        var(--dy)
+      );
+
+    opacity:0;
+  }
+}
+
+
+/* =========================
+   موبایل
+========================= */
 
 @media(max-width:500px){
+
   body{
-    padding:12px
+
+    padding:12px;
   }
 
   .card{
-    padding:18px
+
+    padding:18px;
   }
 
   .question{
-    font-size:18px
+
+    font-size:18px;
   }
 
   .option{
-    font-size:16px
+
+    font-size:16px;
   }
 }
+
 </style>
+
 </head>
+
 
 <body>
 
+
 <div class="container">
 
-<h1>آزمون واژگان عربی عراقی</h1>
 
-<div id="userInfo" class="user"></div>
+<h1>
+آزمون واژگان عربی عراقی
+</h1>
 
-<div id="quizCard" class="card">
 
-  <div id="progress" class="progress"></div>
+<!-- =========================
+     ورود نام دانشجو
+========================= -->
 
-  <div id="question" class="question"></div>
+<div id="startScreen">
+
+  <h2>
+    شروع آزمون
+  </h2>
+
+  <div>
+    لطفاً نام و نام خانوادگی خود را وارد کنید
+  </div>
+
+  <input
+    id="studentName"
+    type="text"
+    placeholder="نام و نام خانوادگی"
+    autocomplete="name"
+  >
+
+  <div
+    id="nameError"
+    class="name-error"
+  >
+    لطفاً نام دانشجو را وارد کنید.
+  </div>
+
+  <button
+    class="start-button"
+    onclick="startQuiz()"
+  >
+    شروع آزمون
+  </button>
+
+</div>
+
+
+<div
+  id="userInfo"
+  class="user"
+  style="display:none"
+></div>
+
+
+<!-- =========================
+     آزمون
+========================= -->
+
+<div
+  id="quizCard"
+  class="card"
+  style="display:none"
+>
+
+  <div
+    id="progress"
+    class="progress"
+  ></div>
+
+  <div
+    id="question"
+    class="question"
+  ></div>
 
   <div id="options"></div>
 
 </div>
 
 
-<div id="result" class="result">
+<!-- =========================
+     نتیجه
+========================= -->
 
-  <h2>آزمون به پایان رسید</h2>
+<div
+  id="result"
+  class="result"
+>
 
-  <div id="finalScore" class="score"></div>
+  <h2>
+    آزمون به پایان رسید
+  </h2>
 
-  <div id="finalDetails" class="final-details"></div>
+  <div
+    id="finalScore"
+    class="score"
+  ></div>
+
+  <div
+    id="finalDetails"
+    class="final-details"
+  ></div>
 
   <div id="wrongAnswers"></div>
 
-  <div id="saveStatus" class="save-status">
+  <div
+    id="saveStatus"
+    class="save-status"
+  >
     نتیجه در حال ارسال است...
   </div>
 
 </div>
+
 
 </div>
 
 
 <script>
 
+
 /* =========================
-   اتصال Google Sheets
+   Google Sheets
 ========================= */
 
-const GOOGLE_SCRIPT_URL="https://script.google.com/macros/s/AKfycbwlQiJOCORFZaTSzNDJYWyZ7jh96OM3zrTcnMz90-1PqGqRqiVJLWSH152MxuW3QNua/exec";
+const GOOGLE_SCRIPT_URL =
+"https://script.google.com/macros/s/AKfycbwlQiJOCORFZaTSzNDJYWyZ7jh96OM3zrTcnMz90-1PqGqRqiVJLWSH152MxuW3QNua/exec";
 
 
 /* =========================
@@ -249,10 +665,15 @@ const GOOGLE_SCRIPT_URL="https://script.google.com/macros/s/AKfycbwlQiJOCORFZaTS
 ========================= */
 
 let current=0;
+
 let score=0;
+
 let correctCount=0;
+
 let wrongCount=0;
+
 let eitaaUserId="";
+
 let studentName="";
 
 let wrongAnswers=[];
@@ -348,34 +769,51 @@ const questions = [
 
 
 /* =========================
-   اتصال به ایتا
+   دریافت اطلاعات ایتا
 ========================= */
 
 function initEitaa(){
 
   try{
 
-    if(window.Eitaa && window.Eitaa.WebApp){
+    if(
+      window.Eitaa &&
+      window.Eitaa.WebApp
+    ){
 
-      const webApp=window.Eitaa.WebApp;
+      const webApp =
+        window.Eitaa.WebApp;
 
-      if(typeof webApp.ready==="function")
+      if(
+        typeof webApp.ready === "function"
+      ){
+
         webApp.ready();
 
-      if(typeof webApp.expand==="function")
+      }
+
+      if(
+        typeof webApp.expand === "function"
+      ){
+
         webApp.expand();
 
-      if(webApp.initDataUnsafe && webApp.initDataUnsafe.user){
+      }
 
-        const user=webApp.initDataUnsafe.user;
-alert(JSON.stringify(user));
-        if(user.id)
-          eitaaUserId=String(user.id);
 
-        if(user.first_name){
+      if(
+        webApp.initDataUnsafe &&
+        webApp.initDataUnsafe.user
+      ){
 
-          document.getElementById("userInfo").textContent=
-            "کاربر: "+user.first_name;
+        const user =
+          webApp.initDataUnsafe.user;
+
+
+        if(user.id){
+
+          eitaaUserId =
+            String(user.id);
 
         }
 
@@ -385,9 +823,77 @@ alert(JSON.stringify(user));
 
   }catch(error){
 
-    console.log("Eitaa error:",error);
+    console.log(
+      "Eitaa error:",
+      error
+    );
 
   }
+
+}
+
+
+/* =========================
+   شروع آزمون
+========================= */
+
+function startQuiz(){
+
+  const input =
+    document.getElementById(
+      "studentName"
+    );
+
+  const error =
+    document.getElementById(
+      "nameError"
+    );
+
+  studentName =
+    input.value.trim();
+
+
+  if(!studentName){
+
+    error.style.display =
+      "block";
+
+    input.focus();
+
+    return;
+
+  }
+
+
+  error.style.display =
+    "none";
+
+
+  document.getElementById(
+    "startScreen"
+  ).style.display =
+    "none";
+
+
+  document.getElementById(
+    "quizCard"
+  ).style.display =
+    "block";
+
+
+  document.getElementById(
+    "userInfo"
+  ).style.display =
+    "block";
+
+
+  document.getElementById(
+    "userInfo"
+  ).textContent =
+    "دانشجو: "+studentName;
+
+
+  renderQuestion();
 
 }
 
@@ -398,107 +904,180 @@ alert(JSON.stringify(user));
 
 function renderQuestion(){
 
-  const q=questions[current];
+  const q =
+    questions[current];
 
-  document.getElementById("progress").textContent=
-    "سؤال "+(current+1)+" از "+questions.length;
 
-  document.getElementById("question").textContent=q.q;
+  document.getElementById(
+    "progress"
+  ).textContent =
+    "سؤال "+
+    (current+1)+
+    " از "+
+    questions.length;
 
-  const options=document.getElementById("options");
+
+  document.getElementById(
+    "question"
+  ).textContent =
+    q.q;
+
+
+  const options =
+    document.getElementById(
+      "options"
+    );
+
 
   options.innerHTML="";
 
-  q.a.forEach(function(answer,index){
 
-    const button=document.createElement("button");
+  q.a.forEach(
+    function(answer,index){
 
-    button.className="option";
+      const button =
+        document.createElement(
+          "button"
+        );
 
-    button.textContent=answer;
 
-    button.onclick=function(){
+      button.className =
+        "option";
 
-      answerQuestion(index,button);
 
-    };
+      button.textContent =
+        answer;
 
-    options.appendChild(button);
 
-  });
+      button.onclick =
+        function(){
+
+          answerQuestion(
+            index,
+            button
+          );
+
+        };
+
+
+      options.appendChild(
+        button
+      );
+
+    }
+  );
 
 }
 
 
 /* =========================
-   پاسخ به سؤال
+   پاسخ
 ========================= */
 
-function answerQuestion(selected,selectedButton){
+function answerQuestion(
+  selected,
+  selectedButton
+){
 
-  const q=questions[current];
-
-  const buttons=document.querySelectorAll(".option");
-
-  buttons.forEach(function(button){
-
-    button.classList.add("disabled");
-
-  });
+  const q =
+    questions[current];
 
 
-  if(selected===q.c){
+  const buttons =
+    document.querySelectorAll(
+      ".option"
+    );
 
-    selectedButton.classList.add("correct");
 
-    score+=0.5;
+  buttons.forEach(
+    function(button){
+
+      button.classList.add(
+        "disabled"
+      );
+
+    }
+  );
+
+
+  if(
+    selected === q.c
+  ){
+
+    selectedButton.classList.add(
+      "correct"
+    );
+
+
+    score += 0.5;
 
     correctCount++;
 
-    navigator.vibrate?.(120);
+
+    if(
+      navigator.vibrate
+    ){
+
+      navigator.vibrate(
+        120
+      );
+
+    }
+
 
     showConfetti();
 
+
   }else{
 
-    selectedButton.classList.add("wrong");
 
-    buttons[q.c].classList.add("correct");
+    selectedButton.classList.add(
+      "wrong"
+    );
+
+
+    buttons[q.c].classList.add(
+      "correct"
+    );
+
 
     wrongCount++;
 
-
-    /* ذخیره فقط سؤال و معنی درست */
 
     wrongAnswers.push({
 
       word:q.q,
 
-      correctAnswer:q.a[q.c]
+      correctAnswer:
+        q.a[q.c]
 
     });
-
-
-    navigator.vibrate?.([80,50,80]);
 
   }
 
 
-  setTimeout(function(){
+  setTimeout(
+    function(){
 
-    current++;
+      current++;
 
-    if(current<questions.length){
 
-      renderQuestion();
+      if(
+        current <
+        questions.length
+      ){
 
-    }else{
+        renderQuestion();
 
-      finishQuiz();
+      }else{
 
-    }
+        finishQuiz();
 
-  },900);
+      }
+
+    },
+    900
+  );
 
 }
 
@@ -509,215 +1088,583 @@ function answerQuestion(selected,selectedButton){
 
 function finishQuiz(){
 
-  document.getElementById("quizCard").style.display="none";
-
-  document.getElementById("result").style.display="block";
-
-
-  const percent=
-    Math.round((correctCount/questions.length)*100);
+  document.getElementById(
+    "quizCard"
+  ).style.display =
+    "none";
 
 
-  document.getElementById("finalScore").textContent=
-    score.toFixed(1)+" از 20";
+  document.getElementById(
+    "result"
+  ).style.display =
+    "block";
 
 
-  document.getElementById("finalDetails").innerHTML=
-    "درست: "+correctCount+
-    "<br>غلط: "+wrongCount+
-    "<br>درصد: "+percent+"%";
+  const percent =
+    Math.round(
+      (
+        correctCount /
+        questions.length
+      ) * 100
+    );
 
 
-  const wrongBox=
-    document.getElementById("wrongAnswers");
+  document.getElementById(
+    "finalScore"
+  ).textContent =
+    score.toFixed(1)+
+    " از 20";
 
 
-  /* اگر همه درست باشد */
+  document.getElementById(
+    "finalDetails"
+  ).innerHTML =
 
-  if(wrongAnswers.length===0){
+    "درست: "+
+    correctCount+
 
-    wrongBox.innerHTML=
+    "<br>غلط: "+
+    wrongCount+
+
+    "<br>درصد: "+
+    percent+
+    "%";
+
+
+  const wrongBox =
+    document.getElementById(
+      "wrongAnswers"
+    );
+
+
+  /* =========================
+     همه پاسخ‌ها درست
+  ========================= */
+
+  if(
+    wrongAnswers.length === 0
+  ){
+
+    wrongBox.innerHTML =
+
       '<div class="perfect-message">'+
 
-      '<div class="arabic">«خذ خطوة صغيرة نحو أحلامك كل يوم...»</div>'+
+      '<div class="arabic">'+
 
-      '<div>هر روز یک قدم حتی کوچک به سمت رویاهات بردار... 🌱</div>'+
+      '🎉 أحسنت! 🎉'+
+
+      '</div>'+
+
+      '<div>'+
+
+      'عالی بود! همه سؤال‌ها را درست جواب دادی ❤️'+
+
+      '</div>'+
 
       '</div>';
+
+
+    /*
+      جشن ممتد
+    */
+
+    startPerfectCelebration();
+
 
   }else{
 
 
-    /* اگر پاسخ غلط وجود داشته باشد */
+    let html =
 
-    let html=
       '<div class="wrong-title">'+
+
       'این کلمات رو بلد نبودی؛ ازشون اسکرین‌شات بگیر 📸'+
+
       '</div>';
 
 
-    wrongAnswers.forEach(function(item){
+    wrongAnswers.forEach(
+      function(item){
 
-      /*
-        فقط واژه و معنی درست نمایش داده می‌شود
-        پاسخ فرد نمایش داده نمی‌شود
-      */
-
-      let word=item.word;
-
-      /*
-        حذف علامت‌های «» و عبارت «یعنی چه؟»
-        برای اینکه خروجی کوتاه و مناسب اسکرین‌شات باشد
-      */
-
-      word=word
-        .replace(/«/g,"")
-        .replace(/»/g,"")
-        .replace(/ یعنی چه؟/g,"")
-        .replace(/ در محیط درمانی عراقی/g,"");
+        let word =
+          item.word;
 
 
-      html+=
-        '<div class="wrong-word">'+
-        '<b>'+word+'</b>'+
-        ': '+
-        item.correctAnswer+
-        '</div>';
+        word =
+          word
+            .replace(/«/g,"")
+            .replace(/»/g,"")
+            .replace(/ یعنی چه؟/g,"")
+            .replace(
+              / در محیط درمانی عراقی/g,
+              ""
+            );
 
-    });
+
+        html +=
+
+          '<div class="wrong-word">'+
+
+          '<b>'+
+          word+
+          '</b>'+
+          ': '+
+          item.correctAnswer+
+
+          '</div>';
+
+      }
+    );
 
 
-    wrongBox.innerHTML=html;
+    wrongBox.innerHTML =
+      html;
 
   }
 
 
   saveResult(
+
     score,
+
     percent,
+
     correctCount,
+
     wrongCount
+
   );
 
 }
 
 
 /* =========================
-   ارسال نتیجه به Google Sheets
+   ارسال به Google Sheets
 ========================= */
 
-function saveResult(finalScore,percent,correct,wrong){
+function saveResult(
+  finalScore,
+  percent,
+  correct,
+  wrong
+){
 
-  const status=
-    document.getElementById("saveStatus");
+  const status =
+    document.getElementById(
+      "saveStatus"
+    );
 
 
   if(!eitaaUserId){
 
-    status.textContent=
-      "شناسه ایتا دریافت نشد؛ آزمون در حالت وب اجرا شده است.";
+    status.textContent =
+      "شناسه ایتا دریافت نشد.";
 
     return;
 
   }
 
 
-  const data={
+  const data = {
 
-    userId:eitaaUserId,
+    userId:
+      eitaaUserId,
 
-    score:finalScore.toFixed(1),
+    studentName:
+      studentName,
 
-    percent:percent,
+    score:
+      finalScore.toFixed(1),
 
-    correct:correct,
+    percent:
+      percent,
 
-    wrong:wrong
+    correct:
+      correct,
+
+    wrong:
+      wrong
 
   };
 
 
-  fetch(GOOGLE_SCRIPT_URL,{
+  fetch(
+    GOOGLE_SCRIPT_URL,
+    {
 
-    method:"POST",
+      method:"POST",
 
-    mode:"no-cors",
+      mode:"no-cors",
 
-    headers:{
-      "Content-Type":"text/plain;charset=utf-8"
-    },
+      headers:{
 
-    body:JSON.stringify(data)
+        "Content-Type":
+          "text/plain;charset=utf-8"
 
-  })
+      },
 
-  .then(function(){
+      body:
+        JSON.stringify(data)
 
-    status.textContent=
-      "✓ نتیجه آزمون ارسال شد.";
+    }
 
-  })
+  )
 
-  .catch(function(error){
+  .then(
+    function(){
 
-    console.error(error);
+      status.textContent =
+        "✓ نتیجه آزمون ارسال شد.";
 
-    status.textContent=
-      "⚠️ ارسال نتیجه انجام نشد.";
+    }
+  )
 
-  });
+  .catch(
+    function(error){
+
+      console.error(
+        error
+      );
+
+      status.textContent =
+        "⚠️ ارسال نتیجه انجام نشد.";
+
+    }
+  );
 
 }
 
 
 /* =========================
-   افکت موفقیت
+   افکت معمولی پاسخ درست
 ========================= */
 
 function showConfetti(){
 
-  const container=
-    document.createElement("div");
+  const container =
+    document.createElement(
+      "div"
+    );
 
-  container.className="confetti";
+
+  container.className =
+    "confetti";
 
 
-  for(let i=0;i<35;i++){
+  for(
+    let i=0;
+    i<20;
+    i++
+  ){
 
-    const piece=
-      document.createElement("span");
+    const piece =
+      document.createElement(
+        "span"
+      );
 
-    piece.style.left=
-      Math.random()*100+"%";
 
-    piece.style.top=
-      Math.random()*20+"%";
+    piece.style.position =
+      "absolute";
 
-    piece.style.background=
-      "hsl("+Math.random()*360+",90%,55%)";
 
-    piece.style.transform=
-      "rotate("+Math.random()*360+"deg)";
+    piece.style.left =
+      Math.random()*100+
+      "%";
 
-    container.appendChild(piece);
+
+    piece.style.top =
+      Math.random()*20+
+      "%";
+
+
+    piece.style.width =
+      "9px";
+
+
+    piece.style.height =
+      "18px";
+
+
+    piece.style.background =
+      "hsl("+
+      Math.random()*360+
+      ",90%,55%)";
+
+
+    piece.style.animation =
+      "fall 1s linear forwards";
+
+
+    container.appendChild(
+      piece
+    );
 
   }
 
 
-  document.body.appendChild(container);
+  document.body.appendChild(
+    container
+  );
 
 
-  setTimeout(function(){
+  setTimeout(
+    function(){
 
-    container.remove();
+      container.remove();
 
-  },1100);
+    },
+    1100
+  );
 
 }
 
 
 /* =========================
-   شروع آزمون
+   جشن کامل
+   قلب باران + نورافشانی
+========================= */
+
+let celebrationHeartTimer;
+
+let celebrationSparkleTimer;
+
+
+function startPerfectCelebration(){
+
+  /*
+    لایه نور
+  */
+
+  const light =
+    document.createElement(
+      "div"
+    );
+
+
+  light.className =
+    "light-show";
+
+
+  document.body.appendChild(
+    light
+  );
+
+
+  /*
+    لایه قلب‌ها
+  */
+
+  const hearts =
+    document.createElement(
+      "div"
+    );
+
+
+  hearts.className =
+    "heart-rain";
+
+
+  document.body.appendChild(
+    hearts
+  );
+
+
+  /*
+    بارش قلب‌ها به صورت ممتد
+  */
+
+  celebrationHeartTimer =
+    setInterval(
+      function(){
+
+        createHeart(
+          hearts
+        );
+
+      },
+      120
+    );
+
+
+  /*
+    نورافشانی ممتد
+  */
+
+  celebrationSparkleTimer =
+    setInterval(
+      function(){
+
+        createSparkle();
+
+      },
+      100
+    );
+
+
+  /*
+    چند قلب و نور بلافاصله
+  */
+
+  for(
+    let i=0;
+    i<20;
+    i++
+  ){
+
+    setTimeout(
+      function(){
+
+        createHeart(
+          hearts
+        );
+
+        createSparkle();
+
+      },
+      i*60
+    );
+
+  }
+
+}
+
+
+/* =========================
+   ساخت قلب
+========================= */
+
+function createHeart(
+  container
+){
+
+  const heart =
+    document.createElement(
+      "div"
+    );
+
+
+  heart.className =
+    "heart";
+
+
+  const heartTypes = [
+    "❤️",
+    "💖",
+    "💕",
+    "💗",
+    "💓",
+    "💝"
+  ];
+
+
+  heart.textContent =
+    heartTypes[
+      Math.floor(
+        Math.random()*
+        heartTypes.length
+      )
+    ];
+
+
+  heart.style.left =
+    Math.random()*100+
+    "%";
+
+
+  heart.style.fontSize =
+    (18+
+    Math.random()*25)+
+    "px";
+
+
+  heart.style.animationDuration =
+    (3+
+    Math.random()*4)+
+    "s";
+
+
+  container.appendChild(
+    heart
+  );
+
+
+  setTimeout(
+    function(){
+
+      heart.remove();
+
+    },
+    8000
+  );
+
+}
+
+
+/* =========================
+   ساخت نور
+========================= */
+
+function createSparkle(){
+
+  const sparkle =
+    document.createElement(
+      "div"
+    );
+
+
+  sparkle.className =
+    "sparkle";
+
+
+  sparkle.style.left =
+    Math.random()*100+
+    "vw";
+
+
+  sparkle.style.top =
+    Math.random()*70+
+    "vh";
+
+
+  sparkle.style.setProperty(
+    "--dx",
+    (
+      Math.random()*200-
+      100
+    )+
+    "px"
+  );
+
+
+  sparkle.style.setProperty(
+    "--dy",
+    (
+      Math.random()*200-
+      100
+    )+
+    "px"
+  );
+
+
+  document.body.appendChild(
+    sparkle
+  );
+
+
+  setTimeout(
+    function(){
+
+      sparkle.remove();
+
+    },
+    1000
+  );
+
+}
+
+
+/* =========================
+   شروع
 ========================= */
 
 window.addEventListener(
@@ -726,13 +1673,13 @@ window.addEventListener(
 
     initEitaa();
 
-    renderQuestion();
-
   }
 );
+
 
 </script>
 
 </body>
+
 </html>
 ```
