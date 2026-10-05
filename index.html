@@ -368,7 +368,7 @@ function initEitaa(){
       if(webApp.initDataUnsafe && webApp.initDataUnsafe.user){
 
         const user=webApp.initDataUnsafe.user;
-
+alert(JSON.stringify(user));
         if(user.id)
           eitaaUserId=String(user.id);
 
