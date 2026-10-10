@@ -53,7 +53,81 @@ function answerMCQ(n,btn){let q=questions[pos],opts=[...document.querySelectorAl
 function saveEssay(){let el=document.getElementById('essay'),v=el.value.trim();if(!v){document.getElementById('needAnswer').textContent='برای رفتن به سؤال بعد، ابتدا پاسخ را بنویسید.';el.focus();return}essayAnswers.push({index:pos,question:questions[pos].q,answer:v,expected:questions[pos].expected,rubric:questions[pos].rubric,maxScore:questions[pos].p});next()}
 function next(){pos++;if(pos<questions.length)renderQuestion();else finish()}
 async function finish(){document.getElementById('quiz').classList.add('hide');let res=document.getElementById('result');res.classList.remove('hide');res.innerHTML='<div class="center"><h2>در حال بررسی پاسخ‌های تشریحی…</h2><p class="muted">برای تصحیح واقعی هوش مصنوعی باید AI_ENDPOINT به Web App سمت سرور متصل باشد.</p></div>';let graded=[],analysis=null;if(AI_ENDPOINT){try{let response=await fetch(AI_ENDPOINT,{method:'POST',headers:{'Content-Type':'text/plain;charset=UTF-8'},body:JSON.stringify({action:'grade_essays',exam:'third',userId,mcqScore,mcqWrong:wrong,answers:essayAnswers})});let data=await response.json();graded=data.gradedAnswers||data.results||[];analysis=data.analysis||null}catch(e){alert("خطای اتصال: "+e.message);}}if(!graded.length){graded=essayAnswers.map(a=>({question:a.question,studentAnswer:a.answer,correctAnswer:a.expected,score:0,maxScore:a.maxScore,analysis:'اتصال تصحیح هوش مصنوعی هنوز تنظیم نشده است؛ این پاسخ نمره‌گذاری نشده است.'}));analysis={strengths:'پس از اتصال هوش مصنوعی، نقاط قوت بر اساس پاسخ‌های تستی و تشریحی استخراج می‌شود.',weaknesses:'پس از اتصال هوش مصنوعی، موارد نیازمند تمرین بر اساس پاسخ‌های آزمون استخراج می‌شود.'}}let essayScore=graded.reduce((s,x)=>s+(Number(x.score)||0),0),total=Math.min(20,mcqScore+essayScore);showResults(total,graded,analysis)}
-function showResults(total,graded,analysis){let h=`<div class="center"><h2>نتیجه آزمون سوم</h2><div class="score">${total.toFixed(1)} / 20</div><p>${(total/20*100).toFixed(0)}٪</p></div>`;h+='<h3>واژگان تست‌های غلط</h3>';h+=wrong.length?wrong.map(x=>`<div class="box wrongbox"><b>${esc(x.word)} : ${esc(x.meaning)}</b><div class="muted">انتخاب شما: ${esc(x.chosen)} • پاسخ صحیح: ${esc(x.correct)}</div></div>`).join(''):'<div class="box">همه سؤال‌های تستی را درست پاسخ دادید.</div>';h+='<h3>بررسی پاسخ‌های تشریحی</h3>';h+=graded.map((x,i)=>`<div class="box essaybox"><b>سؤال</b><br>${esc(x.question||essayAnswers[i]?.question||'')}<br><br><b>جواب نادرست/پاسخ دانشجو</b><br>${esc(x.studentAnswer||x.answer||essayAnswers[i]?.answer||'')}<br><br><b>جواب درست</b><br>${esc(x.correctAnswer||x.expected||essayAnswers[i]?.expected||'')}<br><br><b>تحلیل</b><br>${esc(x.analysis||x.feedback||'')}<br><b>نمره: ${Number(x.score)||0} از ${x.maxScore??essayAnswers[i]?.maxScore}</b></div>`).join('');h+='<h3>نقاط قوت و ضعف شما</h3><div class="box"><b>نقاط قوت</b><br>'+esc(analysis?.strengths||'پس از تحلیل هوش مصنوعی نمایش داده می‌شود.')+'</div><div class="box"><b>موارد نیازمند تمرین</b><br>'+esc(analysis?.weaknesses||'پس از تحلیل هوش مصنوعی نمایش داده می‌شود.')+'</div>';if(total>=18){h+=`<div class="quote">مَثَلُ الدُّنْيَا كَمَثَلِ ظِلِّك، إِنْ طَلَبْتَهُ تَبَاعَدَ وَإِنْ تَرَكْتَهُ تَتَابَع</div><p class="quote-fa">دنیا مثل سایه توست؛ اگر آن را دنبال کنی، دور می‌شود و اگر رهایش کنی، به دنبالت می‌آید.</p>`;heartRain()}document.getElementById('result').innerHTML=h}
+
+function showResults(total, graded, analysis) {
+  let h = `<div class="center">
+    <h2>نتیجه آزمون سوم</h2>
+    <div class="score">${total.toFixed(1)} / 20</div>
+    <p>${(total / 20 * 100).toFixed(0)}٪</p>
+  </div>`;
+
+  // واژگان تستی: فقط کلمه = معنی
+  h += '<h3>واژگان نیازمند مرور</h3>';
+  h += wrong.length
+    ? wrong.map(x =>
+        `<div class="box wrongbox"><b>${esc(x.word)} = ${esc(x.meaning)}</b></div>`
+      ).join('')
+    : '<div class="box">همه سؤال‌های تستی را درست پاسخ دادید.</div>';
+
+  // بررسی پاسخ‌های تشریحی
+  h += '<h3>بررسی پاسخ‌های تشریحی</h3>';
+  h += graded.map((x, i) => {
+    const max = Number(x.maxScore ?? essayAnswers[i]?.maxScore) || 0;
+    const score = Number(x.score) || 0;
+    return `<div class="box essaybox">
+      <b>سؤال</b><br>${esc(x.question || essayAnswers[i]?.question || '')}
+      <br><br><b>پاسخ شما</b><br>${esc(x.studentAnswer || x.answer || essayAnswers[i]?.answer || '')}
+      <br><br><b>پاسخ صحیح</b><br>${esc(x.correctAnswer || x.expected || essayAnswers[i]?.expected || '')}
+      <br><br><b>تحلیل</b><br>${esc(x.analysis || x.feedback || 'تحلیلی از سرور دریافت نشد.')}
+      <br><b>نمره: ${score} از ${max}</b>
+    </div>`;
+  }).join('');
+
+  // استخراج نقاط قوت و ضعف از نتیجه واقعی آزمون
+  const mcqTotal = questions.filter(q => q.t === 'm').length;
+  const mcqCorrect = mcqTotal - wrong.length;
+  const strong = [];
+  const needsPractice = [];
+
+  if (mcqCorrect > 0) {
+    strong.push(`پاسخ صحیح به ${mcqCorrect} سؤال از ${mcqTotal} سؤال تستی`);
+  }
+
+  if (wrong.length) {
+    needsPractice.push(
+      'مرور واژگان: ' +
+      wrong.map(x => `${x.word} = ${x.meaning}`).join('، ')
+    );
+  }
+
+  graded.forEach((x, i) => {
+    const max = Number(x.maxScore ?? essayAnswers[i]?.maxScore) || 0;
+    const score = Number(x.score) || 0;
+    const question = x.question || essayAnswers[i]?.question || `سؤال ${i + 1}`;
+
+    if (max > 0 && score / max >= 0.75) {
+      strong.push(`پاسخ تشریحی: ${question}`);
+    } else if (max > 0) {
+      needsPractice.push(`تمرین پاسخ تشریحی: ${question}`);
+    }
+  });
+
+  h += '<h3>نقاط قوت</h3><div class="box">' +
+    esc(strong.length ? strong.join('؛ ') : 'هنوز پاسخ صحیح قابل تأییدی برای ثبت نیست.') +
+    '</div>';
+
+  h += '<h3>موارد نیازمند تمرین</h3><div class="box">' +
+    esc(needsPractice.length ? needsPractice.join('؛ ') : 'در این آزمون مورد مشخصی برای تمرین ثبت نشد.') +
+    '</div>';
+
+  if (total >= 18) {
+    h += `<div class="quote">مَثَلُ الدُّنْيَا كَمَثَلِ ظِلِّك، إِنْ طَلَبْتَهُ تَبَاعَدَ وَإِنْ تَرَكْتَهُ تَتَابَع</div>
+    <p class="quote-fa">دنیا مثل سایه توست؛ اگر آن را دنبال کنی، دور می‌شود و اگر رهایش کنی، به دنبالت می‌آید.</p>`;
+    heartRain();
+  }
+
+  document.getElementById('result').innerHTML = h;
+}
 function esc(s){return String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
 function fireworks(){let fx=document.getElementById('fx'),symbols=['🎉','✨','🌈','🎊','🟣','🟡','🔵','🩷'];for(let i=0;i<48;i++){let e=document.createElement('span');e.className='particle';e.textContent=symbols[Math.floor(Math.random()*symbols.length)];e.style.left=Math.random()*100+'%';e.style.animationDuration=(1.1+Math.random()*1.5)+'s';e.style.animationDelay=Math.random()*.2+'s';e.style.fontSize=(14+Math.random()*18)+'px';fx.appendChild(e);setTimeout(()=>e.remove(),3000)}}
 function heartRain(){let fx=document.getElementById('fx');for(let i=0;i<90;i++){let e=document.createElement('span');e.className='particle';e.textContent=['❤️','💖','💗','💕','💘'][Math.floor(Math.random()*5)];e.style.left=Math.random()*100+'%';e.style.animationDuration=(2.3+Math.random()*3)+'s';e.style.animationDelay=Math.random()*1.3+'s';e.style.fontSize=(18+Math.random()*18)+'px';fx.appendChild(e);setTimeout(()=>e.remove(),6500)}}
