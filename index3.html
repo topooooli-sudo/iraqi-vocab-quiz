@@ -55,6 +55,8 @@ button.primary{border:0;background:#4d77ff;color:white;padding:14px 22px;border-
 
 <script src="https://developer.eitaa.com/eitaa-web-app.js"></script>
 <script>
+// آدرس Web App سمت سرور برای تصحیح هوش مصنوعی
+// کلید API هوش مصنوعی را هرگز در فایل HTML قرار ندهید.
 const AI_ENDPOINT="https://script.google.com/macros/s/AKfycbydVtdYvp0BeH8HhSgen_mGYh0JrvS6J9uZpCXNcrTVgFQ0WS-x1OXyZWYMRc7bbXL8Eg/exec";
 
 const questions=[
@@ -93,265 +95,234 @@ const questions=[
 let pos=0,mcqScore=0,wrong=[],essayAnswers=[],userId='';
 
 function startQuiz(){
-  document.getElementById('start').classList.add('hide');
-  document.getElementById('quiz').classList.remove('hide');
-  try{
-    if(window.Eitaa&&Eitaa.WebApp){
-      Eitaa.WebApp.ready();
-      userId=String(Eitaa.WebApp.initDataUnsafe?.user?.id||'');
-    }
-  }catch(e){}
-  renderQuestion();
+ document.getElementById('start').classList.add('hide');
+ document.getElementById('quiz').classList.remove('hide');
+ try{
+  if(window.Eitaa&&Eitaa.WebApp){
+   Eitaa.WebApp.ready();
+   userId=String(Eitaa.WebApp.initDataUnsafe?.user?.id||'');
+  }
+ }catch(e){}
+ renderQuestion();
 }
 
 function renderQuestion(){
-  const q=questions[pos];
-  const body=document.getElementById('qbody');
-  document.getElementById('meta').textContent=`سؤال ${pos+1} از ${questions.length} · ${q.p} نمره`;
-  document.getElementById('bar').style.width=(pos/questions.length*100)+'%';
+ const q=questions[pos];
+ const body=document.getElementById('qbody');
+ document.getElementById('meta').textContent=`سؤال ${pos+1} از ${questions.length} · ${q.p} نمره`;
+ document.getElementById('bar').style.width=(pos/questions.length*100)+'%';
 
-  if(q.t==='m'){
-    body.innerHTML=`<div class="question">${q.q}</div><div id="options"></div>`;
+ if(q.t==='m'){
+  body.innerHTML=`<div class="question">${q.q}</div><div id="options"></div>`;
 
-    // هر بار چهار گزینه به شکل تصادفی مرتب می‌شوند.
-    // q.c همچنان اندیس پاسخ صحیح در آرایه اصلی است.
-    q._order=[0,1,2,3];
-    for(let i=q._order.length-1;i>0;i--){
-      const j=Math.floor(Math.random()*(i+1));
-      [q._order[i],q._order[j]]=[q._order[j],q._order[i]];
-    }
-
-    const labels=['الف','ب','ج','د'];
-    const container=document.getElementById('options');
-
-    q._order.forEach((originalIndex,displayIndex)=>{
-      const b=document.createElement('button');
-      b.className='opt';
-      b.textContent=`${labels[displayIndex]}. ${q.a[originalIndex]}`;
-      b.onclick=()=>answerMCQ(displayIndex,b);
-      container.appendChild(b);
-    });
-  }else{
-    body.innerHTML=`<span class="badge">سؤال تشریحی · ${q.p} نمره</span>
-      <div class="question">${q.q}</div>
-      <textarea id="essay" placeholder="پاسخ را بنویسید؛ بدون پاسخ نمی‌توانید جلو بروید."></textarea>
-      <p id="needAnswer" class="muted"></p>
-      <button class="primary" onclick="saveEssay()">ثبت پاسخ و ادامه</button>`;
+  // جایگاه گزینه‌ها تصادفی می‌شود، اما اندیس پاسخ صحیح اصلی دست‌نخورده می‌ماند.
+  q._order=[0,1,2,3];
+  for(let i=q._order.length-1;i>0;i--){
+   const j=Math.floor(Math.random()*(i+1));
+   [q._order[i],q._order[j]]=[q._order[j],q._order[i]];
   }
+
+  const labels=['الف','ب','ج','د'];
+  const container=document.getElementById('options');
+
+  q._order.forEach((originalIndex,displayIndex)=>{
+   const b=document.createElement('button');
+   b.className='opt';
+   b.textContent=`${labels[displayIndex]}. ${q.a[originalIndex]}`;
+   b.onclick=()=>answerMCQ(displayIndex,b);
+   container.appendChild(b);
+  });
+ }else{
+  body.innerHTML=`<span class="badge">سؤال تشریحی · ${q.p} نمره</span><div class="question">${q.q}</div><textarea id="essay" placeholder="پاسخ را بنویسید؛ بدون پاسخ نمی‌توانید ادامه دهید."></textarea><p id="needAnswer" class="muted"></p><button class="primary" onclick="saveEssay()">ثبت پاسخ و ادامه</button>`;
+ }
 }
 
 function answerMCQ(displayIndex,btn){
-  const q=questions[pos];
-  const opts=[...document.querySelectorAll('.opt')];
+ const q=questions[pos];
+ const opts=[...document.querySelectorAll('.opt')];
+ const originalIndex=q._order[displayIndex];
+ const correctDisplayIndex=q._order.indexOf(q.c);
 
-  // اندیس گزینه‌ای که کاربر دیده، به اندیس اصلی تبدیل می‌شود.
-  const originalIndex=q._order[displayIndex];
-  const correctDisplayIndex=q._order.indexOf(q.c);
+ opts.forEach(x=>x.disabled=true);
 
-  opts.forEach(x=>x.disabled=true);
+ if(originalIndex===q.c){
+  mcqScore+=q.p;
+  btn.classList.add('correct');
+  fireworks();
+ }else{
+  btn.classList.add('incorrect');
+  opts[correctDisplayIndex].classList.add('correct');
+  wrong.push({
+   word:q.w||q.q,
+   meaning:q.m||q.a[q.c],
+   chosen:q.a[originalIndex],
+   correct:q.a[q.c],
+   question:q.q
+  });
+ }
 
-  if(originalIndex===q.c){
-    mcqScore+=q.p;
-    btn.classList.add('correct');
-    fireworks();
-  }else{
-    btn.classList.add('incorrect');
-    opts[correctDisplayIndex].classList.add('correct');
-
-    wrong.push({
-      word:q.w||q.q,
-      meaning:q.m||q.a[q.c],
-      chosen:q.a[originalIndex],
-      correct:q.a[q.c],
-      question:q.q
-    });
-  }
-
-  try{
-    if(navigator.vibrate){
-      navigator.vibrate(originalIndex===q.c?[40,30,60]:100);
-    }
-  }catch(e){}
-
-  setTimeout(next,850);
+ try{
+  if(navigator.vibrate)navigator.vibrate(originalIndex===q.c?[40,30,60]:100);
+ }catch(e){}
+ setTimeout(next,850);
 }
 
 function saveEssay(){
-  const el=document.getElementById('essay');
-  const v=el.value.trim();
-
-  if(!v){
-    document.getElementById('needAnswer').textContent='برای رفتن به سؤال بعد، ابتدا پاسخ را بنویسید.';
-    el.focus();
-    return;
-  }
-
-  essayAnswers.push({
-    index:pos,
-    question:questions[pos].q,
-    answer:v,
-    expected:questions[pos].expected,
-    rubric:questions[pos].rubric,
-    maxScore:questions[pos].p
-  });
-  next();
+ const el=document.getElementById('essay');
+ const v=el.value.trim();
+ if(!v){
+  document.getElementById('needAnswer').textContent='برای رفتن به سؤال بعد، ابتدا پاسخ را بنویسید.';
+  el.focus();
+  return;
+ }
+ essayAnswers.push({
+  index:pos,
+  question:questions[pos].q,
+  answer:v,
+  expected:questions[pos].expected,
+  rubric:questions[pos].rubric,
+  maxScore:questions[pos].p
+ });
+ next();
 }
 
 function next(){
-  pos++;
-  if(pos<questions.length)renderQuestion();
-  else finish();
+ pos++;
+ if(pos<questions.length)renderQuestion();
+ else finish();
 }
 
 async function finish(){
-  document.getElementById('quiz').classList.add('hide');
-  const res=document.getElementById('result');
-  res.classList.remove('hide');
-  res.innerHTML='<div class="center"><h2>در حال بررسی پاسخ‌های تشریحی…</h2><p class="muted">در حال دریافت نتیجه از سرویس تصحیح.</p></div>';
+ document.getElementById('quiz').classList.add('hide');
+ const res=document.getElementById('result');
+ res.classList.remove('hide');
+ res.innerHTML='<div class="center"><h2>در حال بررسی پاسخ‌های تشریحی…</h2><p class="muted">در حال ارسال پاسخ‌ها برای تصحیح هوش مصنوعی هستیم.</p></div>';
 
-  let graded=[],analysis=null;
+ let graded=[],analysis=null;
 
+ if(AI_ENDPOINT){
   try{
-    const response=await fetch(AI_ENDPOINT,{
-      method:'POST',
-      headers:{'Content-Type':'application/json'},
-      body:JSON.stringify({
-        action:'grade_exam',
-        exam:'third',
-        userId,
-        mcqScore,
-        mcqWrong:wrong,
-        answers:essayAnswers
-      })
-    });
-
-    const data=await response.json();
-    graded=data.gradedAnswers||data.results||[];
-    analysis=data.analysis||null;
+   const response=await fetch(AI_ENDPOINT,{
+    method:'POST',
+    headers:{'Content-Type':'text/plain;charset=UTF-8'},
+    body:JSON.stringify({
+     action:'grade_exam',
+     exam:'third',
+     userId,
+     mcqScore,
+     mcqWrong:wrong,
+     answers:essayAnswers
+    })
+   });
+   if(!response.ok)throw new Error('HTTP '+response.status);
+   const data=await response.json();
+   graded=data.gradedAnswers||data.results||[];
+   analysis=data.analysis||null;
   }catch(e){
-    console.error('خطا در دریافت تصحیح:',e);
+   console.error('AI grading error:',e);
+   res.innerHTML='<div class="center"><h2>دریافت تصحیح هوش مصنوعی ناموفق بود</h2><p class="muted">پاسخ‌های شما در همین صفحه باقی می‌مانند. اتصال Web App و گزارش خطا را بررسی کنید.</p></div>';
+   const retry=document.createElement('button');
+   retry.className='primary';
+   retry.textContent='تلاش دوباره برای تصحیح';
+   retry.onclick=()=>finish();
+   res.appendChild(retry);
+   return;
   }
+ }
 
-  if(!graded.length){
-    graded=essayAnswers.map(a=>({
-      question:a.question,
-      studentAnswer:a.answer,
-      correctAnswer:a.expected,
-      score:0,
-      maxScore:a.maxScore,
-      analysis:'نتیجه تصحیح از سرور دریافت نشد؛ این پاسخ هنوز نمره‌گذاری نشده است.'
-    }));
+ if(!graded.length){
+  res.innerHTML='<div class="center"><h2>پاسخ تصحیح دریافت نشد</h2><p class="muted">سرور متصل شد، اما فهرست پاسخ‌های تصحیح‌شده خالی بود. ساختار پاسخ Web App را بررسی کنید.</p></div>';
+  const retry=document.createElement('button');
+  retry.className='primary';
+  retry.textContent='تلاش دوباره';
+  retry.onclick=()=>finish();
+  res.appendChild(retry);
+  return;
+ }
 
-    analysis={
-      strengths:'تحلیل نقاط قوت پس از دریافت ارزیابی هوش مصنوعی نمایش داده می‌شود.',
-      overall:'به دلیل دریافت‌نشدن ارزیابی هوش مصنوعی، پاسخ‌های تشریحی هنوز نمره‌گذاری نشده‌اند.'
-    };
-  }
-
-  const essayScore=graded.reduce((s,x)=>s+(Number(x.score)||0),0);
-  const total=Math.min(20,mcqScore+essayScore);
-  showResults(total,graded,analysis);
+ const essayScore=graded.reduce((s,x)=>s+(Number(x.score)||0),0);
+ const total=Math.min(20,mcqScore+essayScore);
+ showResults(total,graded,analysis);
 }
 
 function showResults(total,graded,analysis){
-  let h=`<div class="center"><h2>نتیجه آزمون سوم</h2>
-    <div class="score">${total.toFixed(1)} / 20</div>
-    <p>${(total/20*100).toFixed(0)}٪</p></div>`;
+ let h=`<div class="center"><h2>نتیجه آزمون سوم</h2><div class="score">${total.toFixed(1)} / 20</div><p>${(total/20*100).toFixed(0)}٪</p></div>`;
 
-  h+='<h3>واژگان تست‌های غلط</h3>';
+ h+='<h3>واژگان تست‌های غلط</h3>';
+ h+=wrong.length
+  ?wrong.map(x=>`<div class="box wrongbox"><b>${esc(x.word)} : ${esc(x.meaning)}</b><div class="muted">انتخاب شما: ${esc(x.chosen)} · پاسخ صحیح: ${esc(x.correct)}</div></div>`).join('')
+  :'<div class="box">همه سؤال‌های تستی را درست پاسخ دادید.</div>';
 
-  h+=wrong.length
-    ?wrong.map(x=>`<div class="box wrongbox"><b>${esc(x.word)} : ${esc(x.meaning)}</b><div class="muted">انتخاب شما: ${esc(x.chosen)} · پاسخ صحیح: ${esc(x.correct)}</div></div>`).join('')
-    :'<div class="box">همه سؤال‌های تستی را درست پاسخ دادید.</div>';
+ h+='<h3>بررسی پاسخ‌های تشریحی</h3>';
+ h+=graded.map((x,i)=>{
+  const max=Number(x.maxScore??essayAnswers[i]?.maxScore)||0;
+  const score=Number(x.score)||0;
+  return `<div class="box essaybox">
+   <b>سؤال</b><br>${esc(x.question||essayAnswers[i]?.question||'')}
+   <br><br><b>پاسخ شما</b><br>${esc(x.studentAnswer||x.answer||essayAnswers[i]?.answer||'')}
+   <br><br><b>پاسخ پیشنهادی</b><br>${esc(x.correctAnswer||x.expected||essayAnswers[i]?.expected||'')}
+   <br><br><b>تحلیل پاسخ</b><br>${esc(x.analysis||x.feedback||'تحلیلی از سرور دریافت نشد.')}
+   <br><b>نمره: ${score} از ${max}</b>
+  </div>`;
+ }).join('');
 
-  h+='<h3>بررسی پاسخ‌های تشریحی</h3>';
+ h+='<h3>نقاط قوت</h3><div class="box">'+esc(analysis?.strengths||'تحلیل نقاط قوت بر اساس پاسخ‌های واقعی آزمون پس از دریافت پاسخ سرور نمایش داده می‌شود.')+'</div>';
 
-  h+=graded.map((x,i)=>{
-    const max=Number(x.maxScore??essayAnswers[i]?.maxScore)||0;
-    const score=Number(x.score)||0;
+ const mcqTotal=questions.filter(q=>q.t==='m').length;
+ const mcqCorrect=mcqTotal-wrong.length;
+ const essayMax=graded.reduce((sum,x,i)=>sum+(Number(x.maxScore??essayAnswers[i]?.maxScore)||0),0);
+ const essayScore=graded.reduce((sum,x)=>sum+(Number(x.score)||0),0);
 
-    return `<div class="box essaybox">
-      <b>سؤال</b><br>${esc(x.question||essayAnswers[i]?.question||'')}<br><br>
-      <b>پاسخ شما</b><br>${esc(x.studentAnswer||x.answer||essayAnswers[i]?.answer||'')}<br><br>
-      <b>پاسخ پیشنهادی</b><br>${esc(x.correctAnswer||x.expected||essayAnswers[i]?.expected||'')}<br><br>
-      <b>تحلیل پاسخ</b><br>${esc(x.analysis||x.feedback||'تحلیلی از سرور دریافت نشد.')}<br>
-      <b>نمره: ${score} از ${max}</b>
-    </div>`;
-  }).join('');
+ h+='<h3>تحلیل کلی آزمون</h3>';
+ const summary=[`واژگان: از ${mcqTotal} سؤال تستی، ${mcqCorrect} پاسخ صحیح ثبت شده است.`];
+ if(essayMax>0)summary.push(`پاسخ‌های تشریحی: ${essayScore.toFixed(2)} از ${essayMax} نمره ثبت شده است.`);
+ const overall=analysis?.overall||analysis?.summary||analysis?.analysis;
+ if(overall)summary.push(overall);
+ else summary.push('تحلیل توانایی انتقال مفهوم، انتخاب واژگان و کاربرد ساخت فعل و زمان‌ها باید بر اساس بررسی واقعی پاسخ‌های تشریحی توسط هوش مصنوعی ارائه شود.');
 
-  h+='<h3>نقاط قوت</h3><div class="box">'+
-    esc(analysis?.strengths||'تحلیل نقاط قوت بر اساس پاسخ‌های واقعی آزمون پس از دریافت پاسخ سرور نمایش داده می‌شود.')+
-    '</div>';
+ h+='<div class="box">'+summary.map(s=>`<p>${esc(s)}</p>`).join('')+'</div>';
 
-  const mcqTotal=questions.filter(q=>q.t==='m').length;
-  const mcqCorrect=mcqTotal-wrong.length;
-  const essayMax=graded.reduce((sum,x,i)=>sum+(Number(x.maxScore??essayAnswers[i]?.maxScore)||0),0);
-  const essayScore=graded.reduce((sum,x)=>sum+(Number(x.score)||0),0);
+ if(total>=18){
+  h+=`<div class="quote">مَثَلُ الدُّنْيَا كَمَثَلِ ظِلِّك، إِنْ طَلَبْتَهُ تَبَاعَدَ وَإِنْ تَرَكْتَهُ تَتَابَع</div><p class="quote-fa">دنیا مثل سایه توست؛ اگر آن را دنبال کنی، دور می‌شود و اگر رهایش کنی، به دنبالت می‌آید.</p>`;
+  heartRain();
+ }
 
-  h+='<h3>تحلیل کلی آزمون</h3>';
-  const summary=[`واژگان: از ${mcqTotal} سؤال تستی، ${mcqCorrect} پاسخ صحیح ثبت شده است.`];
-
-  if(essayMax>0){
-    summary.push(`پاسخ‌های تشریحی: ${essayScore.toFixed(2)} از ${essayMax} نمره ثبت شده است.`);
-  }
-
-  const overall=analysis?.overall||analysis?.summary||analysis?.analysis;
-
-  if(overall)summary.push(overall);
-  else summary.push('تحلیل توانایی انتقال مفهوم، انتخاب واژگان و کاربرد ساخت فعل و زمان‌ها باید بر اساس بررسی واقعی پاسخ‌های تشریحی توسط هوش مصنوعی ارائه شود.');
-
-  h+='<div class="box">'+summary.map(s=>`<p>${esc(s)}</p>`).join('')+'</div>';
-
-  if(total>=18){
-    h+=`<div class="quote">مَثَلُ الدُّنْيَا كَمَثَلِ ظِلِّك، إِنْ طَلَبْتَهُ تَبَاعَدَ وَإِنْ تَرَكْتَهُ تَتَابَع</div>
-      <p class="quote-fa">دنیا مثل سایه توست؛ اگر آن را دنبال کنی، دور می‌شود و اگر رهایش کنی، به دنبالت می‌آید.</p>`;
-    heartRain();
-  }
-
-  document.getElementById('result').innerHTML=h;
+ document.getElementById('result').innerHTML=h;
 }
 
 function esc(s){
-  return String(s??'').replace(/[&<>"']/g,c=>({
-    '&':'&amp;',
-    '<':'&lt;',
-    '>':'&gt;',
-    '"':'&quot;',
-    "'":'&#39;'
-  }[c]));
+ return String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 }
 
 function fireworks(){
-  const fx=document.getElementById('fx');
-  const symbols=['🎉','✨','🌈','🎊','🟣','🟡','🔵','🩷'];
-
-  for(let i=0;i<48;i++){
-    const e=document.createElement('span');
-    e.className='particle';
-    e.textContent=symbols[Math.floor(Math.random()*symbols.length)];
-    e.style.left=Math.random()*100+'%';
-    e.style.animationDuration=(1.1+Math.random()*1.5)+'s';
-    e.style.animationDelay=Math.random()*.2+'s';
-    e.style.fontSize=(14+Math.random()*18)+'px';
-    fx.appendChild(e);
-    setTimeout(()=>e.remove(),3000);
-  }
+ const fx=document.getElementById('fx');
+ const symbols=['🎉','✨','🌈','🎊','🟣','🟡','🔵','🩷'];
+ for(let i=0;i<48;i++){
+  const e=document.createElement('span');
+  e.className='particle';
+  e.textContent=symbols[Math.floor(Math.random()*symbols.length)];
+  e.style.left=Math.random()*100+'%';
+  e.style.animationDuration=(1.1+Math.random()*1.5)+'s';
+  e.style.animationDelay=Math.random()*.2+'s';
+  e.style.fontSize=(14+Math.random()*18)+'px';
+  fx.appendChild(e);
+  setTimeout(()=>e.remove(),3000);
+ }
 }
 
 function heartRain(){
-  const fx=document.getElementById('fx');
-
-  for(let i=0;i<90;i++){
-    const e=document.createElement('span');
-    e.className='particle';
-    e.textContent=['❤️','💖','💗','💕','💘'][Math.floor(Math.random()*5)];
-    e.style.left=Math.random()*100+'%';
-    e.style.animationDuration=(2.3+Math.random()*3)+'s';
-    e.style.animationDelay=Math.random()*1.3+'s';
-    e.style.fontSize=(18+Math.random()*18)+'px';
-    fx.appendChild(e);
-    setTimeout(()=>e.remove(),6500);
-  }
+ const fx=document.getElementById('fx');
+ for(let i=0;i<90;i++){
+  const e=document.createElement('span');
+  e.className='particle';
+  e.textContent=['❤️','💖','💗','💕','💘'][Math.floor(Math.random()*5)];
+  e.style.left=Math.random()*100+'%';
+  e.style.animationDuration=(2.3+Math.random()*3)+'s';
+  e.style.animationDelay=Math.random()*1.3+'s';
+  e.style.fontSize=(18+Math.random()*18)+'px';
+  fx.appendChild(e);
+  setTimeout(()=>e.remove(),6500);
+ }
 }
 </script>
 </body>
