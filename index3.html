@@ -47,7 +47,40 @@ const questions=[
 {t:'e',p:.5,q:'(بگو): «ساعت نه و ربع شب» به عربی عراقی.',expected:'السّاعة تِسْعَة ورُبْع بالليل.',rubric:'بیان طبیعی ساعت: ۰٫۵ نمره'}
 ];
 let pos=0,mcqScore=0,wrong=[],essayAnswers=[],userId='';
-function startQuiz(){document.getElementById('start').classList.add('hide');document.getElementById('quiz').classList.remove('hide');try{if(window.Eitaa&&Eitaa.WebApp){Eitaa.WebApp.ready();userId=String(Eitaa.WebApp.initDataUnsafe?.user?.id||'')}}catch(e){}renderQuestion()}
+  let optionsShuffled = false;
+
+function shuffleMCQOptions(){
+  if(optionsShuffled) return;
+  optionsShuffled = true;
+
+  const mcqs = questions.filter(q => q.t === 'm');
+  const positions = [];
+
+  for(let i = 0; i < mcqs.length; i++){
+    positions.push(i % 4);
+  }
+
+  for(let i = positions.length - 1; i > 0; i--){
+    const j = Math.floor(Math.random() * (i + 1));
+    [positions[i], positions[j]] = [positions[j], positions[i]];
+  }
+
+  mcqs.forEach((q, i) => {
+    const correct = q.a[q.c];
+    const distractors = q.a.filter((_, index) => index !== q.c);
+
+    for(let j = distractors.length - 1; j > 0; j--){
+      const k = Math.floor(Math.random() * (j + 1));
+      [distractors[j], distractors[k]] = [distractors[k], distractors[j]];
+    }
+
+    const newIndex = positions[i];
+    distractors.splice(newIndex, 0, correct);
+    q.a = distractors;
+    q.c = newIndex;
+  });
+}
+function startQuiz(){shuffleMCQOptions();document.getElementById('start').classList.add('hide');document.getElementById('quiz').classList.remove('hide');try{if(window.Eitaa&&Eitaa.WebApp){Eitaa.WebApp.ready();userId=String(Eitaa.WebApp.initDataUnsafe?.user?.id||'')}}catch(e){}renderQuestion()}
 function renderQuestion(){let q=questions[pos],body=document.getElementById('qbody');document.getElementById('meta').textContent=`سؤال ${pos+1} از ${questions.length} • ${q.p} نمره`;document.getElementById('bar').style.width=(pos/questions.length*100)+'%';if(q.t==='m'){body.innerHTML=`<div class="question">${q.q}</div><div id="options"></div>`;q.a.forEach((a,n)=>{let b=document.createElement('button');b.className='opt';b.innerHTML=`${['الف','ب','ج','د'][n]}. ${a}`;b.onclick=()=>answerMCQ(n,b);document.getElementById('options').appendChild(b)})}else{body.innerHTML=`<span class="badge">سؤال تشریحی • ${q.p} نمره</span><div class="question">${q.q}</div><textarea id="essay" placeholder="پاسخ را بنویسید؛ بدون پاسخ نمی‌توانید ادامه دهید."></textarea><p id="needAnswer" class="muted"></p><button class="primary" onclick="saveEssay()">ثبت پاسخ و ادامه</button>`}}
 function answerMCQ(n,btn){let q=questions[pos],opts=[...document.querySelectorAll('.opt')];opts.forEach(x=>x.disabled=true);if(n===q.c){mcqScore+=q.p;btn.classList.add('correct');fireworks()}else{btn.classList.add('incorrect');opts[q.c].classList.add('correct');wrong.push({word:q.w||q.q,meaning:q.m||q.a[q.c],chosen:q.a[n],correct:q.a[q.c],question:q.q})}try{if(navigator.vibrate)navigator.vibrate(n===q.c?[40,30,60]:100)}catch(e){}setTimeout(next,850)}
 function saveEssay(){let el=document.getElementById('essay'),v=el.value.trim();if(!v){document.getElementById('needAnswer').textContent='برای رفتن به سؤال بعد، ابتدا پاسخ را بنویسید.';el.focus();return}essayAnswers.push({index:pos,question:questions[pos].q,answer:v,expected:questions[pos].expected,rubric:questions[pos].rubric,maxScore:questions[pos].p});next()}
