@@ -10,7 +10,8 @@
 body{margin:0;background:linear-gradient(135deg,#edf5ff,#f9f1ff);font-family:Tahoma,Arial,sans-serif;color:#18233a}
 .wrap{max-width:740px;margin:auto;padding:16px}
 .card{background:#fff;border-radius:22px;padding:22px;box-shadow:0 8px 30px #0001}
-.center{text-align:center}.hide{display:none}
+.center{text-align:center}
+.hide{display:none}
 .muted{font-size:13px;color:#6b7489;line-height:1.9}
 .bar{height:8px;background:#e7ebf4;border-radius:20px;overflow:hidden;margin:12px 0}
 .bar i{display:block;height:100%;background:#4d77ff;width:0;transition:.3s}
@@ -51,9 +52,9 @@ button.primary{border:0;background:#4d77ff;color:white;padding:14px 22px;border-
 <section id="result" class="card hide"></section>
 </div>
 <div id="fx" class="celebrate"></div>
+
 <script src="https://developer.eitaa.com/eitaa-web-app.js"></script>
 <script>
-// آدرس اتصال سرور تصحیح هوش مصنوعی
 const AI_ENDPOINT="https://script.google.com/macros/s/AKfycbydVtdYvp0BeH8HhSgen_mGYh0JrvS6J9uZpCXNcrTVgFQ0WS-x1OXyZWYMRc7bbXL8Eg/exec";
 
 const questions=[
@@ -77,10 +78,10 @@ const questions=[
 {t:'m',p:.5,q:'«مِشْمِش» یعنی چه؟',a:['انجیر','خرما','زردآلو','سیب'],c:2,w:'مِشْمِش',m:'زردآلو'},
 {t:'m',p:.5,q:'«تِين» یعنی چه؟',a:['انجیر','انار','موز','هندوانه'],c:0,w:'تِين',m:'انجیر'},
 {t:'m',p:.5,q:'«إِجّاص» یعنی چه؟',a:['خرما','گلابی','انگور','سیب'],c:1,w:'إِجّاص',m:'گلابی'},
-{t:'m',p:.5,q:'کدام گزینه معنی «داشت عضلاتش را حرکت می‌داد» می‌دهد؟',a:['راح يحرّك عضلاته','چان يحرّك عضلاته','دا حرّك عضلاته','يحرّك عضلاته راح'],c:1},
+{t:'m',p:.5,q:'کدام گزینه در عراقی معنی «داشت عضلاتش را حرکت می‌داد» می‌دهد؟',a:['راح يحرّك عضلاته','چان يحرّك عضلاته','دا حرّك عضلاته','يحرّك عضلاته راح'],c:1},
 {t:'m',p:.5,q:'برای گفتن «فردا پزشک معاینه‌ات می‌کند» کدام ساختار آینده مناسب است؟',a:['چان الطبيب يفحصك','دا الطبيب فحصك','باچر الطبيب راح يفحصك','الطبيب فحصك باچر'],c:2},
-{t:'m',p:.5,q:'«دا يِتَنَفَّس بِصُعُوبَة» چه مفهومی دارد؟',a:['نفسش به‌سختی بالا می‌آید','خوب غذا می‌خورد','خوابیده است','فردا می‌آید'],c:0},
-{t:'m',p:.5,q:'کدام گزینه امر مناسب برای درخواست از بیمار است؟',a:['راح تفتح فمك','چان تفتح فمك','اِفْتَح فَمَك','دا فتح فمك'],c:2},
+{t:'m',p:.5,q:'«دا يِتَنَفَّس بِصُعُوبَة» بیشتر چه مفهومی دارد؟',a:['نفسش به‌سختی بالا می‌آید','خوب غذا می‌خورد','خوابیده است','فردا می‌آید'],c:0},
+{t:'m',p:.5,q:'کدام گزینه امرِ مناسب برای درخواست از بیمار است؟',a:['راح تفتح فمك','چان تفتح فمك','اِفْتَح فَمَك','دا فتح فمك'],c:2},
 {t:'m',p:.5,q:'«خُذ نَفَس عَميق، وبَعدين طَلِّعَه بِشْوَيّة» یعنی چه؟',a:['یک نفس عمیق بکش و بعد آرام بیرون بده','دهانت را باز کن','فردا دوباره بیا','دستت را بالا ببر'],c:0,w:'خُذ نَفَس عَميق، وبَعدين طَلِّعَه بِشْوَيّة',m:'یک نفس عمیق بکش و بعد آرام بیرون بده'},
 {t:'e',p:2,q:'(بگو): «لطفاً دهانت را باز کن؛ می‌خواهم دندان‌هایت را بررسی کنم.»',expected:'لَو سَمَحْت، اِفْتَح فَمَك، أريد أَفْحَص أَسْنانَك.',rubric:'معنا ۱؛ طبیعی‌بودن عراقی ۰٫۵؛ ساختار و دستور ۰٫۵'},
 {t:'e',p:2,q:'(بگو): «از دیروز سینه‌ام درد می‌کند و نفس کشیدن برایم سخت است.»',expected:'مِن البارحة صَدْري يوجعني، والتنفس صعب عليّ.',rubric:'معنا ۱؛ طبیعی‌بودن عراقی ۰٫۵؛ ساختار و دستور ۰٫۵'},
@@ -92,174 +93,265 @@ const questions=[
 let pos=0,mcqScore=0,wrong=[],essayAnswers=[],userId='';
 
 function startQuiz(){
- document.getElementById('start').classList.add('hide');
- document.getElementById('quiz').classList.remove('hide');
- try{
-  if(window.Eitaa&&Eitaa.WebApp){
-   Eitaa.WebApp.ready();
-   userId=String(Eitaa.WebApp.initDataUnsafe?.user?.id||'');
-  }
- }catch(e){}
- renderQuestion();
+  document.getElementById('start').classList.add('hide');
+  document.getElementById('quiz').classList.remove('hide');
+  try{
+    if(window.Eitaa&&Eitaa.WebApp){
+      Eitaa.WebApp.ready();
+      userId=String(Eitaa.WebApp.initDataUnsafe?.user?.id||'');
+    }
+  }catch(e){}
+  renderQuestion();
 }
 
 function renderQuestion(){
- let q=questions[pos],body=document.getElementById('qbody');
- document.getElementById('meta').textContent=`سؤال ${pos+1} از ${questions.length} · ${q.p} نمره`;
- document.getElementById('bar').style.width=(pos/questions.length*100)+'%';
- if(q.t==='m'){
-  body.innerHTML=`<div class="question">${q.q}</div><div id="options"></div>`;
-  q.a.forEach((a,n)=>{
-   let b=document.createElement('button');
-   b.className='opt';
-   b.innerHTML=`${['الف','ب','ج','د'][n]}. ${a}`;
-   b.onclick=()=>answerMCQ(n,b);
-   document.getElementById('options').appendChild(b);
-  });
- }else{
-  body.innerHTML=`<span class="badge">سؤال تشریحی · ${q.p} نمره</span><div class="question">${q.q}</div><textarea id="essay" placeholder="پاسخ را بنویسید؛ بدون پاسخ نمی‌توانید جلو بروید."></textarea><p id="needAnswer" class="muted"></p><button class="primary" onclick="saveEssay()">ثبت پاسخ و ادامه</button>`;
- }
+  const q=questions[pos];
+  const body=document.getElementById('qbody');
+  document.getElementById('meta').textContent=`سؤال ${pos+1} از ${questions.length} · ${q.p} نمره`;
+  document.getElementById('bar').style.width=(pos/questions.length*100)+'%';
+
+  if(q.t==='m'){
+    body.innerHTML=`<div class="question">${q.q}</div><div id="options"></div>`;
+
+    // هر بار چهار گزینه به شکل تصادفی مرتب می‌شوند.
+    // q.c همچنان اندیس پاسخ صحیح در آرایه اصلی است.
+    q._order=[0,1,2,3];
+    for(let i=q._order.length-1;i>0;i--){
+      const j=Math.floor(Math.random()*(i+1));
+      [q._order[i],q._order[j]]=[q._order[j],q._order[i]];
+    }
+
+    const labels=['الف','ب','ج','د'];
+    const container=document.getElementById('options');
+
+    q._order.forEach((originalIndex,displayIndex)=>{
+      const b=document.createElement('button');
+      b.className='opt';
+      b.textContent=`${labels[displayIndex]}. ${q.a[originalIndex]}`;
+      b.onclick=()=>answerMCQ(displayIndex,b);
+      container.appendChild(b);
+    });
+  }else{
+    body.innerHTML=`<span class="badge">سؤال تشریحی · ${q.p} نمره</span>
+      <div class="question">${q.q}</div>
+      <textarea id="essay" placeholder="پاسخ را بنویسید؛ بدون پاسخ نمی‌توانید جلو بروید."></textarea>
+      <p id="needAnswer" class="muted"></p>
+      <button class="primary" onclick="saveEssay()">ثبت پاسخ و ادامه</button>`;
+  }
 }
 
-function answerMCQ(n,btn){
- let q=questions[pos],opts=[...document.querySelectorAll('.opt')];
- opts.forEach(x=>x.disabled=true);
- if(n===q.c){
-  mcqScore+=q.p;btn.classList.add('correct');fireworks();
- }else{
-  btn.classList.add('incorrect');opts[q.c].classList.add('correct');
-  wrong.push({word:q.w||q.q,meaning:q.m||q.a[q.c],chosen:q.a[n],correct:q.a[q.c],question:q.q});
- }
- try{if(navigator.vibrate)navigator.vibrate(n===q.c?[40,30,60]:100)}catch(e){}
- setTimeout(next,850);
+function answerMCQ(displayIndex,btn){
+  const q=questions[pos];
+  const opts=[...document.querySelectorAll('.opt')];
+
+  // اندیس گزینه‌ای که کاربر دیده، به اندیس اصلی تبدیل می‌شود.
+  const originalIndex=q._order[displayIndex];
+  const correctDisplayIndex=q._order.indexOf(q.c);
+
+  opts.forEach(x=>x.disabled=true);
+
+  if(originalIndex===q.c){
+    mcqScore+=q.p;
+    btn.classList.add('correct');
+    fireworks();
+  }else{
+    btn.classList.add('incorrect');
+    opts[correctDisplayIndex].classList.add('correct');
+
+    wrong.push({
+      word:q.w||q.q,
+      meaning:q.m||q.a[q.c],
+      chosen:q.a[originalIndex],
+      correct:q.a[q.c],
+      question:q.q
+    });
+  }
+
+  try{
+    if(navigator.vibrate){
+      navigator.vibrate(originalIndex===q.c?[40,30,60]:100);
+    }
+  }catch(e){}
+
+  setTimeout(next,850);
 }
 
 function saveEssay(){
- let el=document.getElementById('essay'),v=el.value.trim();
- if(!v){
-  document.getElementById('needAnswer').textContent='برای رفتن به سؤال بعد، ابتدا پاسخ را بنویسید.';
-  el.focus();return;
- }
- essayAnswers.push({index:pos,question:questions[pos].q,answer:v,expected:questions[pos].expected,rubric:questions[pos].rubric,maxScore:questions[pos].p});
- next();
+  const el=document.getElementById('essay');
+  const v=el.value.trim();
+
+  if(!v){
+    document.getElementById('needAnswer').textContent='برای رفتن به سؤال بعد، ابتدا پاسخ را بنویسید.';
+    el.focus();
+    return;
+  }
+
+  essayAnswers.push({
+    index:pos,
+    question:questions[pos].q,
+    answer:v,
+    expected:questions[pos].expected,
+    rubric:questions[pos].rubric,
+    maxScore:questions[pos].p
+  });
+  next();
 }
 
 function next(){
- pos++;
- if(pos<questions.length)renderQuestion();
- else finish();
+  pos++;
+  if(pos<questions.length)renderQuestion();
+  else finish();
 }
 
 async function finish(){
- document.getElementById('quiz').classList.add('hide');
- let res=document.getElementById('result');
- res.classList.remove('hide');
- res.innerHTML='<div class="center"><h2>در حال بررسی پاسخ‌های تشریحی…</h2><p class="muted">در حال ارسال پاسخ‌ها برای تصحیح.</p></div>';
+  document.getElementById('quiz').classList.add('hide');
+  const res=document.getElementById('result');
+  res.classList.remove('hide');
+  res.innerHTML='<div class="center"><h2>در حال بررسی پاسخ‌های تشریحی…</h2><p class="muted">در حال دریافت نتیجه از سرویس تصحیح.</p></div>';
 
- let graded=[],analysis=null;
- if(AI_ENDPOINT){
+  let graded=[],analysis=null;
+
   try{
-   let response=await fetch(AI_ENDPOINT,{
-    method:'POST',
-    headers:{'Content-Type':'application/json'},
-    body:JSON.stringify({action:'grade_exam',exam:'third',userId,mcqScore,mcqWrong:wrong,answers:essayAnswers})
-   });
-   let data=await response.json();
-   graded=data.gradedAnswers||data.results||[];
-   analysis=data.analysis||null;
-  }catch(e){}
- }
+    const response=await fetch(AI_ENDPOINT,{
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({
+        action:'grade_exam',
+        exam:'third',
+        userId,
+        mcqScore,
+        mcqWrong:wrong,
+        answers:essayAnswers
+      })
+    });
 
- if(!graded.length){
-  graded=essayAnswers.map(a=>({
-   question:a.question,studentAnswer:a.answer,correctAnswer:a.expected,
-   score:0,maxScore:a.maxScore,
-   analysis:'تصحیح هوش مصنوعی دریافت نشد؛ این پاسخ هنوز نمره‌گذاری نشده است.'
-  }));
-  analysis={
-   strengths:'تحلیل نقاط قوت از سرور دریافت نشد.',
-   overall:'به دلیل دریافت‌نشدن ارزیابی هوش مصنوعی، تحلیل دقیق پاسخ‌های تشریحی ممکن نیست.'
-  };
- }
+    const data=await response.json();
+    graded=data.gradedAnswers||data.results||[];
+    analysis=data.analysis||null;
+  }catch(e){
+    console.error('خطا در دریافت تصحیح:',e);
+  }
 
- let essayScore=graded.reduce((s,x)=>s+(Number(x.score)||0),0);
- let total=Math.min(20,mcqScore+essayScore);
- showResults(total,graded,analysis);
+  if(!graded.length){
+    graded=essayAnswers.map(a=>({
+      question:a.question,
+      studentAnswer:a.answer,
+      correctAnswer:a.expected,
+      score:0,
+      maxScore:a.maxScore,
+      analysis:'نتیجه تصحیح از سرور دریافت نشد؛ این پاسخ هنوز نمره‌گذاری نشده است.'
+    }));
+
+    analysis={
+      strengths:'تحلیل نقاط قوت پس از دریافت ارزیابی هوش مصنوعی نمایش داده می‌شود.',
+      overall:'به دلیل دریافت‌نشدن ارزیابی هوش مصنوعی، پاسخ‌های تشریحی هنوز نمره‌گذاری نشده‌اند.'
+    };
+  }
+
+  const essayScore=graded.reduce((s,x)=>s+(Number(x.score)||0),0);
+  const total=Math.min(20,mcqScore+essayScore);
+  showResults(total,graded,analysis);
 }
 
 function showResults(total,graded,analysis){
- let h=`<div class="center"><h2>نتیجه آزمون سوم</h2><div class="score">${total.toFixed(1)} / 20</div><p>${(total/20*100).toFixed(0)}٪</p></div>`;
+  let h=`<div class="center"><h2>نتیجه آزمون سوم</h2>
+    <div class="score">${total.toFixed(1)} / 20</div>
+    <p>${(total/20*100).toFixed(0)}٪</p></div>`;
 
- h+='<h3>واژگان تست‌های غلط</h3>';
- h+=wrong.length
-  ?wrong.map(x=>`<div class="box wrongbox"><b>${esc(x.word)} : ${esc(x.meaning)}</b><div class="muted">انتخاب شما: ${esc(x.chosen)} · پاسخ صحیح: ${esc(x.correct)}</div></div>`).join('')
-  :'<div class="box">همه سؤال‌های تستی را درست پاسخ دادید.</div>';
+  h+='<h3>واژگان تست‌های غلط</h3>';
 
- h+='<h3>بررسی پاسخ‌های تشریحی</h3>';
- h+=graded.map((x,i)=>`
-  <div class="box essaybox">
-   <b>سؤال</b><br>${esc(x.question||essayAnswers[i]?.question||'')}
-   <br><br><b>پاسخ شما</b><br>${esc(x.studentAnswer||x.answer||essayAnswers[i]?.answer||'')}
-   <br><br><b>پاسخ پیشنهادی</b><br>${esc(x.correctAnswer||x.expected||essayAnswers[i]?.expected||'')}
-   <br><br><b>تحلیل پاسخ</b><br>${esc(x.analysis||x.feedback||'تحلیل جداگانه‌ای از سرور دریافت نشد.')}
-   <br><b>نمره: ${Number(x.score)||0} از ${x.maxScore??essayAnswers[i]?.maxScore??0}</b>
-  </div>`).join('');
+  h+=wrong.length
+    ?wrong.map(x=>`<div class="box wrongbox"><b>${esc(x.word)} : ${esc(x.meaning)}</b><div class="muted">انتخاب شما: ${esc(x.chosen)} · پاسخ صحیح: ${esc(x.correct)}</div></div>`).join('')
+    :'<div class="box">همه سؤال‌های تستی را درست پاسخ دادید.</div>';
 
- // بخش نقاط قوت باقی می‌ماند.
- h+='<h3>نقاط قوت</h3><div class="box">'+
-  esc(analysis?.strengths||'تحلیل نقاط قوت از سرور دریافت نشد.')+'</div>';
+  h+='<h3>بررسی پاسخ‌های تشریحی</h3>';
 
- // تحلیل کلی آزمون؛ بخش «موارد نیازمند تمرین» عمداً حذف شده است.
- h+='<h3>تحلیل کلی آزمون</h3>';
- const mcqTotal=questions.filter(q=>q.t==='m').length;
- const mcqCorrect=mcqTotal-wrong.length;
- const essayMax=graded.reduce((sum,x,i)=>sum+(Number(x.maxScore??essayAnswers[i]?.maxScore)||0),0);
- const essayScore=graded.reduce((sum,x)=>sum+(Number(x.score)||0),0);
- const summary=[];
- summary.push(`واژگان: از ${mcqTotal} سؤال تستی، ${mcqCorrect} پاسخ صحیح ثبت شده است.`);
- if(essayMax>0)summary.push(`پاسخ‌های تشریحی: ${essayScore.toFixed(2)} از ${essayMax} نمره کسب شده است.`);
- if(analysis?.overall||analysis?.summary||analysis?.analysis){
-  summary.push(analysis.overall||analysis.summary||analysis.analysis);
- }else{
-  summary.push('تحلیل دقیق درک معنا، کاربرد واژگان و ساخت فعل و زمان‌ها زمانی قابل ارائه است که سرور این اطلاعات را از هوش مصنوعی برگرداند.');
- }
- h+='<div class="box">'+summary.map(x=>`<p>${esc(x)}</p>`).join('')+'</div>';
+  h+=graded.map((x,i)=>{
+    const max=Number(x.maxScore??essayAnswers[i]?.maxScore)||0;
+    const score=Number(x.score)||0;
 
- if(total>=18){
-  h+=`<div class="quote">مَثَلُ الدُّنْيَا كَمَثَلِ ظِلِّك، إِنْ طَلَبْتَهُ تَبَاعَدَ وَإِنْ تَرَكْتَهُ تَتَابَع</div><p class="quote-fa">دنیا مثل سایه توست؛ اگر آن را دنبال کنی، دور می‌شود و اگر رهایش کنی، به دنبالت می‌آید.</p>`;
-  heartRain();
- }
- document.getElementById('result').innerHTML=h;
+    return `<div class="box essaybox">
+      <b>سؤال</b><br>${esc(x.question||essayAnswers[i]?.question||'')}<br><br>
+      <b>پاسخ شما</b><br>${esc(x.studentAnswer||x.answer||essayAnswers[i]?.answer||'')}<br><br>
+      <b>پاسخ پیشنهادی</b><br>${esc(x.correctAnswer||x.expected||essayAnswers[i]?.expected||'')}<br><br>
+      <b>تحلیل پاسخ</b><br>${esc(x.analysis||x.feedback||'تحلیلی از سرور دریافت نشد.')}<br>
+      <b>نمره: ${score} از ${max}</b>
+    </div>`;
+  }).join('');
+
+  h+='<h3>نقاط قوت</h3><div class="box">'+
+    esc(analysis?.strengths||'تحلیل نقاط قوت بر اساس پاسخ‌های واقعی آزمون پس از دریافت پاسخ سرور نمایش داده می‌شود.')+
+    '</div>';
+
+  const mcqTotal=questions.filter(q=>q.t==='m').length;
+  const mcqCorrect=mcqTotal-wrong.length;
+  const essayMax=graded.reduce((sum,x,i)=>sum+(Number(x.maxScore??essayAnswers[i]?.maxScore)||0),0);
+  const essayScore=graded.reduce((sum,x)=>sum+(Number(x.score)||0),0);
+
+  h+='<h3>تحلیل کلی آزمون</h3>';
+  const summary=[`واژگان: از ${mcqTotal} سؤال تستی، ${mcqCorrect} پاسخ صحیح ثبت شده است.`];
+
+  if(essayMax>0){
+    summary.push(`پاسخ‌های تشریحی: ${essayScore.toFixed(2)} از ${essayMax} نمره ثبت شده است.`);
+  }
+
+  const overall=analysis?.overall||analysis?.summary||analysis?.analysis;
+
+  if(overall)summary.push(overall);
+  else summary.push('تحلیل توانایی انتقال مفهوم، انتخاب واژگان و کاربرد ساخت فعل و زمان‌ها باید بر اساس بررسی واقعی پاسخ‌های تشریحی توسط هوش مصنوعی ارائه شود.');
+
+  h+='<div class="box">'+summary.map(s=>`<p>${esc(s)}</p>`).join('')+'</div>';
+
+  if(total>=18){
+    h+=`<div class="quote">مَثَلُ الدُّنْيَا كَمَثَلِ ظِلِّك، إِنْ طَلَبْتَهُ تَبَاعَدَ وَإِنْ تَرَكْتَهُ تَتَابَع</div>
+      <p class="quote-fa">دنیا مثل سایه توست؛ اگر آن را دنبال کنی، دور می‌شود و اگر رهایش کنی، به دنبالت می‌آید.</p>`;
+    heartRain();
+  }
+
+  document.getElementById('result').innerHTML=h;
 }
 
 function esc(s){
- return String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+  return String(s??'').replace(/[&<>"']/g,c=>({
+    '&':'&amp;',
+    '<':'&lt;',
+    '>':'&gt;',
+    '"':'&quot;',
+    "'":'&#39;'
+  }[c]));
 }
 
 function fireworks(){
- let fx=document.getElementById('fx'),symbols=['🎉','✨','🌈','🎊','🟣','🟡','🔵','🩷'];
- for(let i=0;i<48;i++){
-  let e=document.createElement('span');e.className='particle';
-  e.textContent=symbols[Math.floor(Math.random()*symbols.length)];
-  e.style.left=Math.random()*100+'%';
-  e.style.animationDuration=(1.1+Math.random()*1.5)+'s';
-  e.style.animationDelay=Math.random()*.2+'s';
-  e.style.fontSize=(14+Math.random()*18)+'px';
-  fx.appendChild(e);setTimeout(()=>e.remove(),3000);
- }
+  const fx=document.getElementById('fx');
+  const symbols=['🎉','✨','🌈','🎊','🟣','🟡','🔵','🩷'];
+
+  for(let i=0;i<48;i++){
+    const e=document.createElement('span');
+    e.className='particle';
+    e.textContent=symbols[Math.floor(Math.random()*symbols.length)];
+    e.style.left=Math.random()*100+'%';
+    e.style.animationDuration=(1.1+Math.random()*1.5)+'s';
+    e.style.animationDelay=Math.random()*.2+'s';
+    e.style.fontSize=(14+Math.random()*18)+'px';
+    fx.appendChild(e);
+    setTimeout(()=>e.remove(),3000);
+  }
 }
 
 function heartRain(){
- let fx=document.getElementById('fx');
- for(let i=0;i<90;i++){
-  let e=document.createElement('span');e.className='particle';
-  e.textContent=['❤️','💖','💗','💕','💘'][Math.floor(Math.random()*5)];
-  e.style.left=Math.random()*100+'%';
-  e.style.animationDuration=(2.3+Math.random()*3)+'s';
-  e.style.animationDelay=Math.random()*1.3+'s';
-  e.style.fontSize=(18+Math.random()*18)+'px';
-  fx.appendChild(e);setTimeout(()=>e.remove(),6500);
- }
+  const fx=document.getElementById('fx');
+
+  for(let i=0;i<90;i++){
+    const e=document.createElement('span');
+    e.className='particle';
+    e.textContent=['❤️','💖','💗','💕','💘'][Math.floor(Math.random()*5)];
+    e.style.left=Math.random()*100+'%';
+    e.style.animationDuration=(2.3+Math.random()*3)+'s';
+    e.style.animationDelay=Math.random()*1.3+'s';
+    e.style.fontSize=(18+Math.random()*18)+'px';
+    fx.appendChild(e);
+    setTimeout(()=>e.remove(),6500);
+  }
 }
 </script>
 </body>
