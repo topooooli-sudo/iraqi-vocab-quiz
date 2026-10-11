@@ -92,4 +92,19 @@ function next(){idx++;if(idx<Q.length)show();else finish();}
 function normalizeArabic(s){return String(s||"").toLowerCase().normalize("NFD").replace(/[\u064B-\u065F\u0670\u0640]/g,"").replace(/[أإآٱ]/g,"ا").replace(/ى/g,"ي").replace(/ة/g,"ه").replace(/گ/g,"ك").replace(/[،؛؟,.!؟:؛]/g," ").replace(/[^\u0600-\u06FF0-9\s]/g," ").replace(/\s+/g," ").trim();}
 function gradeEssays(){return essays.map(x=>{const q=Q[x.index],answer=x.answer||"",n=normalizeArabic(answer);let score=0;const criteria=q.criteria||[];if(n){criteria.forEach(c=>{const found=c.v.some(term=>n.includes(normalizeArabic(term)));if(found)score+=c.w;});}score=Math.min(q.p,Math.round(score*100)/100);return {question:q.q,answer:answer,correctAnswer:q.expected,score:score,maxScore:q.p,correct:score>=q.p-0.001,feedback:score>=q.p-0.001?"":(answer?"پاسخ با معیارهای کلیدی این سؤال کاملاً منطبق نبود.":"پاسخی ثبت نشده است.")};});}
 function gradeMcqs(){return Q.map((q,i)=>({q,i})).filter(x=>x.q.t==="m").map(({q})=>({arabic:q.w||q.q,meaning:q.m||"",correctAnswer:q.a[q.c],correct:true,score:q.p,maxScore:q.p}));}
+async function finish(){
+ locked=true;document.getElementById("quiz").classList.add("hide");const panel=document.getElementById("result");panel.classList.remove("hide");panel.innerHTML='<div class="center"><h2>آزمون تمام شد</h2><p>در حال محاسبهٔ نتیجه…</p></div>';
+ const essayResults=gradeEssays();const essayScore=essayResults.reduce((s,x)=>s+x.score,0);const mcqTotal=Q.filter(x=>x.t==="m").reduce((s,x)=>s+x.p,0);const total=mcqScore+essayScore;const percent=Math.round(total/20*100);const mcqCorrect=mcqScore/.5;const essayFullyCorrect=essayResults.filter(x=>x.correct).length;const fullyCorrect=mcqCorrect+essayFullyCorrect;const wrongCount=30-fullyCorrect;
+ let html=`<div class="center"><h2>نتیجهٔ آزمون</h2><div class="score">${fmt(total)} از ۲۰</div><p>نمرهٔ تستی: <b>${fmt(mcqScore)} از ${fmt(mcqTotal)}</b><br>نمرهٔ تشریحی: <b>${fmt(essayScore)} از ۷٫۵</b><br>درصد: <b>${fmt(percent)}٪</b></p><p>سؤال‌های کاملاً درست: <b>${fmt(fullyCorrect)}</b> از ۳۰</p></div>`;
+ if(wrong.length){html+='<h3>معنی سؤال‌های تستیِ اشتباه</h3>';wrong.forEach(x=>{html+=`<div class="box wrong"><span class="arabic">${esc(x.w)}</span><br>${esc(x.m)}</div>`;});}
+ const essayWrong=essayResults.filter(x=>!x.correct);
+ html+='<h3>پاسخ‌های تشریحی نیازمند اصلاح</h3>';
+ if(!essayWrong.length)html+='<div class="box">همهٔ پاسخ‌های تشریحی با معیارهای کلیدی این آزمون منطبق بودند. 🎉</div>';
+ else essayWrong.forEach(x=>{html+=`<div class="box wrong"><b>سؤال:</b> ${esc(x.question)}<br><b>پاسخ هنرجو:</b> ${esc(x.answer||"بی‌پاسخ")}<br><b>پاسخ معیار:</b> ${esc(x.correctAnswer)}<br><b>نمره:</b> ${fmt(x.score)} از ${fmt(x.maxScore)}</div>`;});
+ html+='<p class="meta note">تصحیح تشریحی در این نسخه با معیارهای کلیدی انجام می‌شود، نه هوش مصنوعی؛ اگر پاسخ هم‌معنی با واژه‌های متفاوت باشد ممکن است نمرهٔ دقیق نیاز به بررسی مدرس داشته باشد.</p><div id="saveStatus" class="meta note">در حال ارسال نتیجه به گوگل‌شیت…</div>';
+ panel.innerHTML=html;panel.scrollIntoView({behavior:"smooth",block:"start"});
+ const essayCorrectCount=essayResults.filter(x=>x.correct).length;
+ const payload={quizId:"iraqi_clinical_30",quizTitle:"آزمون عربی عراقی کادر درمان",studentName:studentName,eitaaUserId:uid||null,totalScore:total,maxScore:20,testScore:mcqScore,essayScore:essayScore,correctCount:fullyCorrect,wrongCount:wrongCount,multipleChoice:{score:mcqScore,maxScore:mcqTotal,correctCount:mcqCorrect,wrongCount:25-mcqCorrect,items:Q.filter(x=>x.t==="m").map(q=>({question:q.q,arabic:q.w,meaning:q.m,score:wrong.some(w=>w.w===q.w)?0:q.p,maxScore:q.p}))},essay:{score:essayScore,maxScore:7.5,correctCount:essayCorrectCount,gradingStatus:"graded",answers:essayResults},submittedAt:new Date().toISOString()};
+ await sendResult(payload);
+ if(total>=18){hearts();}
 
