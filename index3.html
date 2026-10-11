@@ -206,6 +206,8 @@ async function finish(){
  if(AI_ENDPOINT){
   try{
    console.log("پاسخ‌های تشریحی ارسالی:", essayAnswers);
+   console.log("essayAnswers:", essayAnswers);
+console.log("تعداد پاسخ‌های تشریحی:", essayAnswers.length);
    const response=await fetch(AI_ENDPOINT,{
     method:'POST',
     headers:{'Content-Type':'text/plain;charset=UTF-8'},
