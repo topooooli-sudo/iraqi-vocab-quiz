@@ -260,7 +260,6 @@ function showResults(total,graded,analysis){
   </div>`;
  }).join('');
 
- h+='<h3>نقاط قوت</h3><div class="box">'+esc(analysis?.strengths||'تحلیل نقاط قوت بر اساس پاسخ‌های واقعی آزمون پس از دریافت پاسخ سرور نمایش داده می‌شود.')+'</div>';
 
  const mcqTotal=questions.filter(q=>q.t==='m').length;
  const mcqCorrect=mcqTotal-wrong.length;
