@@ -302,8 +302,21 @@ function showResults(total,graded,analysis){
  const summary=[`واژگان: از ${mcqTotal} سؤال تستی، ${mcqCorrect} پاسخ صحیح ثبت شده است.`];
  if(essayMax>0)summary.push(`پاسخ‌های تشریحی: ${essayScore.toFixed(2)} از ${essayMax} نمره ثبت شده است.`);
  const overall=analysis?.overall||analysis?.summary||analysis?.analysis;
- if(overall)summary.push(overall);
- else summary.push('تحلیل توانایی انتقال مفهوم، انتخاب واژگان و کاربرد ساخت فعل و زمان‌ها باید بر اساس بررسی واقعی پاسخ‌های تشریحی توسط هوش مصنوعی ارائه شود.');
+
+const overall = analysis?.overall || analysis?.summary || analysis?.analysis;
+
+if (overall) {
+  summary.push(overall);
+} else if (analysis?.strengths || analysis?.weaknesses) {
+  if (analysis?.strengths) {
+    summary.push('نقاط قوت: ' + analysis.strengths);
+  }
+  if (analysis?.weaknesses) {
+    summary.push('موارد نیازمند تمرین: ' + analysis.weaknesses);
+  }
+} else {
+  summary.push('تحلیل نهایی از سرور دریافت نشد؛ اتصال بخش تحلیل کلی را بررسی کنید.');
+}
 
  h+='<div class="box">'+summary.map(s=>`<p>${esc(s)}</p>`).join('')+'</div>';
 
