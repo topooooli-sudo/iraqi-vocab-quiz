@@ -270,7 +270,6 @@ function showResults(total,graded,analysis){
  h+='<h3>تحلیل کلی آزمون</h3>';
  const summary=[`واژگان: از ${mcqTotal} سؤال تستی، ${mcqCorrect} پاسخ صحیح ثبت شده است.`];
  if(essayMax>0)summary.push(`پاسخ‌های تشریحی: ${essayScore.toFixed(2)} از ${essayMax} نمره ثبت شده است.`);
- const overall=analysis?.overall||analysis?.summary||analysis?.analysis;
 
 const overall = analysis?.overall || analysis?.summary || analysis?.analysis;
 
