@@ -41,6 +41,13 @@ button.primary{border:0;background:#4d77ff;color:white;padding:14px 22px;border-
 <h1>آزمون سوم · عربی عراقی</h1>
 <p>واژگان میوه‌ها و اعضای بدن با تأکید بر مکالمات کادر درمان</p>
 <div class="box">۳۰ سؤال · ۲۰ نمره</div>
+ <input
+  id="studentName"
+  type="text"
+  placeholder="نام و نام خانوادگی شرکت‌کننده"
+  autocomplete="name"
+  style="width:100%;padding:14px;border:2px solid #dfe4ed;border-radius:14px;font:inherit;margin:10px 0;"
+>
 <p class="muted">در سؤال‌های تستی، نتیجه بلافاصله نمایش داده می‌شود. در سؤال تشریحی تا واردکردن پاسخ نمی‌توانید جلو بروید.</p>
 <button class="primary" onclick="startQuiz()">شروع آزمون</button>
 </section>
@@ -95,9 +102,20 @@ const questions=[
 {t:'e',p:.5,q:'(بگو): «ساعت نه و ربع شب» به عربی عراقی.',expected:'السّاعة تِسْعَة ورُبْع بالليل.',rubric:'بیان طبیعی ساعت: ۰٫۵ نمره'}
 ];
 
-let pos=0,mcqScore=0,wrong=[],essayAnswers=[],userId='';
+let pos=0,mcqScore=0,wrong=[],essayAnswers=[],userId='',studentName='';
 
 function startQuiz(){
+ const nameInput = document.getElementById('studentName');
+ const name = nameInput.value.trim();
+
+ if (!name) {
+  nameInput.focus();
+  nameInput.placeholder = 'لطفاً ابتدا نام و نام خانوادگی را وارد کنید';
+  return;
+ }
+
+ studentName = name;
+
  document.getElementById('start').classList.add('hide');
  document.getElementById('quiz').classList.remove('hide');
  try{
@@ -215,6 +233,7 @@ console.log("تعداد پاسخ‌های تشریحی:", essayAnswers.length);
      action:'grade_essays',
      exam:'third',
      userId,
+     studentName,
      mcqScore,
      mcqWrong:wrong,
      answers:essayAnswers
