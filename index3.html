@@ -269,22 +269,28 @@ function showResults(total,graded,analysis){
  h+='<h3>تحلیل کلی آزمون</h3>';
 const summary=[];
 
+
 const overall = analysis?.overall || analysis?.summary || analysis?.analysis;
 
-if (overall) {
-  summary.push(overall);
+if (typeof overall === 'string' && overall.trim()) {
+  summary.push(overall.trim());
 } else {
-  const strengths = (analysis?.strengths || '').trim();
-  const weaknesses = (analysis?.weaknesses || '').trim();
+  const strengths = String(analysis?.strengths || '').trim();
+  const weaknesses = String(analysis?.weaknesses || '').trim();
 
-  if (strengths && weaknesses) {
-    summary.push('تمرین بعدی: ' + weaknesses);
-  } else if (weaknesses) {
+  if (strengths) {
+    summary.push('نقاط قوت: ' + strengths);
+  }
+
+  if (weaknesses) {
     summary.push('موارد نیازمند تمرین: ' + weaknesses);
-  } else if (!strengths) {
-    summary.push('تحلیل نهایی از سرور دریافت نشد؛ اتصال بخش تحلیل کلی را بررسی کنید.');
+  }
+
+  if (!strengths && !weaknesses) {
+    summary.push('سرور تحلیل کلی را برنگردانده یا پاسخ آن خالی است.');
   }
 }
+
 
  h+='<div class="box">'+summary.map(s=>`<p>${esc(s)}</p>`).join('')+'</div>';
 
