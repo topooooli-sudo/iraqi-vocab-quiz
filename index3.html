@@ -303,7 +303,6 @@ function showResults(total,graded,analysis){
 const summary=[];
 
 
-const overall = analysis?.overall || analysis?.summary || analysis?.analysis;
 
 if (typeof overall === 'string' && overall.trim()) {
   summary.push(overall.trim());
