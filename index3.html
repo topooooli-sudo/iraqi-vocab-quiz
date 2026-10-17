@@ -299,32 +299,6 @@ function showResults(total,graded,analysis){
  const essayMax=graded.reduce((sum,x,i)=>sum+(Number(x.maxScore??essayAnswers[i]?.maxScore)||0),0);
  const essayScore=graded.reduce((sum,x)=>sum+(Number(x.score)||0),0);
 
- h+='<h3>تحلیل کلی آزمون</h3>';
-const summary=[];
-
-
-
-if (typeof overall === 'string' && overall.trim()) {
-  summary.push(overall.trim());
-} else {
-  const strengths = String(analysis?.strengths || '').trim();
-  const weaknesses = String(analysis?.weaknesses || '').trim();
-
-  if (strengths) {
-    summary.push('نقاط قوت: ' + strengths);
-  }
-
-  if (weaknesses) {
-    summary.push('موارد نیازمند تمرین: ' + weaknesses);
-  }
-
-  if (!strengths && !weaknesses) {
-    summary.push('سرور تحلیل کلی را برنگردانده یا پاسخ آن خالی است.');
-  }
-}
-
-
- h+='<div class="box">'+summary.map(s=>`<p>${esc(s)}</p>`).join('')+'</div>';
 
  if(total>=18){
   h+=`<div class="quote">مَثَلُ الدُّنْيَا كَمَثَلِ ظِلِّك، إِنْ طَلَبْتَهُ تَبَاعَدَ وَإِنْ تَرَكْتَهُ تَتَابَع</div><p class="quote-fa">دنیا مثل سایه توست؛ اگر آن را دنبال کنی، دور می‌شود و اگر رهایش کنی، به دنبالت می‌آید.</p>`;
