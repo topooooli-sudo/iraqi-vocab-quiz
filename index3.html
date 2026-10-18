@@ -281,7 +281,10 @@ function showResults(total,graded,analysis){
  h+='<h3>بررسی پاسخ‌های تشریحی</h3>';
  h+=graded.map((x,i)=>{
   const max=Number(x.maxScore??essayAnswers[i]?.maxScore)||0;
-  const score=Number(x.score)||0;
+const score=Number(x.score)||0;
+const scoreText=x.ungraded
+  ? 'تصحیح نشد؛ نمره هنوز مشخص نیست'
+  : `نمره: ${score} از ${max}`;
   return `<div class="box essaybox">
    <b>سؤال</b><br>${esc(x.question||essayAnswers[i]?.question||'')}
    <br><br><b>پاسخ شما</b><br>${esc(x.studentAnswer||x.answer||essayAnswers[i]?.answer||'')}
