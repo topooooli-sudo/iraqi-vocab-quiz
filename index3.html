@@ -298,7 +298,7 @@ const scoreText=x.ungraded
  const mcqTotal=questions.filter(q=>q.t==='m').length;
  const mcqCorrect=mcqTotal-wrong.length;
  const essayMax=graded.reduce((sum,x,i)=>sum+(Number(x.maxScore??essayAnswers[i]?.maxScore)||0),0);
- const essayScore=graded.reduce((sum,x)=>sum+(Number(x.score)||0),0);
+ const essayScore=graded.reduce((sum,x)=>x.ungraded?sum:sum+(Number(x.score)||0),0);
 
 
  if(total>=17){
