@@ -266,7 +266,8 @@ console.log("تعداد پاسخ‌های تشریحی:", essayAnswers.length);
  }
 
  const essayScore=graded.reduce((s,x)=>x.ungraded?s:s+(Number(x.score)||0),0);
- const total=Math.min(20,mcqScore+essayScore);
+ const hasUngraded = graded.some(x => x.ungraded);
+const total = Math.min(20, mcqScore + essayScore);
  showResults(total,graded,analysis);
 }
 
