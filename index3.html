@@ -314,7 +314,8 @@ const scoreText=x.ungraded
    <b>سؤال</b><br>${esc(x.question||essayAnswers[i]?.question||'')}
    <br><br><b>پاسخ شما</b><br>${esc(x.studentAnswer||x.answer||essayAnswers[i]?.answer||'')}
    <br><br><b>پاسخ پیشنهادی</b><br>${esc(x.correctAnswer||x.expected||essayAnswers[i]?.expected||'')}
-   <br><br><b>تحلیل پاسخ</b><br>${esc(x.analysis||x.feedback||'تحلیلی از سرور دریافت نشد.')}
+   <br><br><b>تحلیل پاسخ</b>
+   <div class="analysis3d">${esc(x.analysis||x.feedback||'تحلیلی از سرور دریافت نشد.')}</div>
    <br><b>${scoreText}</b>
   </div>`;
  }).join('');
