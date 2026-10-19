@@ -343,7 +343,7 @@ const scoreText=x.ungraded
    <br><br><b>پاسخ شما</b><br>${esc(x.studentAnswer||x.answer||essayAnswers[i]?.answer||'')}
    <br><br><b>پاسخ پیشنهادی</b><br>${esc(x.correctAnswer||x.expected||essayAnswers[i]?.expected||'')}
    <br><br><b>تحلیل پاسخ</b>
-   <div>${esc(x.analysis||x.feedback||'تحلیلی از سرور دریافت نشد.')}</div>
+   <div>${formatAnalysis(x.analysis||x.feedback||'تحلیلی از سرور دریافت نشد.')}</div>
    <br><b>${scoreText}</b>
   </div>`;
  }).join('');
@@ -362,7 +362,17 @@ const scoreText=x.ungraded
 
  document.getElementById('result').innerHTML=h;
 }
+function formatAnalysis(text) {
+  text = String(text || '');
 
+  // شوخی در انتهای تحلیل قرار دارد و با ایموجی شروع می‌شود.
+  const match = text.match(/([\s\S]*?)(\s*[😂🤣😅😆🙊🐔🐴🐑🐝👏😍😘].*)$/u);
+
+  if (!match) return esc(text);
+
+  return `${esc(match[1])}
+    <div class="analysis3d">${esc(match[2])}</div>`;
+}
 function esc(s){
  return String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 }
