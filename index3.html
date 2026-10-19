@@ -343,7 +343,10 @@ const scoreText=x.ungraded
    <br><br><b>پاسخ شما</b><br>${esc(x.studentAnswer||x.answer||essayAnswers[i]?.answer||'')}
    <br><br><b>پاسخ پیشنهادی</b><br>${esc(x.correctAnswer||x.expected||essayAnswers[i]?.expected||'')}
    <br><br><b>تحلیل پاسخ</b>
-   <div>${formatAnalysis(x.analysis||x.feedback||'تحلیلی از سرور دریافت نشد.')}</div>
+   
+<div>${esc(x.analysis||x.feedback||'تحلیلی از سرور دریافت نشد.')}</div>
+${x.joke ? `<div class="analysis3d">✨ ${esc(x.joke)} ✨</div>` : ''}
+
    <br><b>${scoreText}</b>
   </div>`;
  }).join('');
