@@ -1,1 +1,433 @@
-111
+
+<!doctype html>
+<html lang="fa" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<title>آزمون چهارم عربی عراقی</title>
+<style>
+*{box-sizing:border-box}
+body{margin:0;background:linear-gradient(135deg,#edf5ff,#f9f1ff);font-family:Tahoma,Arial,sans-serif;color:#18233a}
+.wrap{max-width:740px;margin:auto;padding:16px}
+.card{background:#fff;border-radius:22px;padding:22px;box-shadow:0 8px 30px #0001}
+.center{text-align:center}
+.hide{display:none}
+.muted{font-size:13px;color:#6b7489;line-height:1.9}
+.bar{height:8px;background:#e7ebf4;border-radius:20px;overflow:hidden;margin:12px 0}
+.bar i{display:block;height:100%;background:#4d77ff;width:0;transition:.3s}
+.question{font-size:20px;font-weight:bold;line-height:2;margin:18px 0}
+.opt{display:block;width:100%;text-align:right;background:white;border:2px solid #e1e6ef;border-radius:14px;padding:14px;margin:9px 0;font-size:16px;cursor:pointer}
+.opt:disabled{cursor:default}
+.correct{background:#eafff0!important;border-color:#19a35a!important;color:#096b31}
+.incorrect{background:#fff0f0!important;border-color:#dd4141!important;color:#9e2020}
+textarea{width:100%;min-height:140px;border:2px solid #dfe4ed;border-radius:14px;padding:13px;font:inherit;line-height:1.9}
+button.primary{border:0;background:#4d77ff;color:white;padding:14px 22px;border-radius:14px;font-size:16px;font-weight:bold;cursor:pointer}
+.box{background:#f7f9fd;border-radius:15px;padding:14px;margin:10px 0;line-height:2}
+.wrongbox{background:#fff5f5;border-right:5px solid #d84444}
+.essaybox{border:1px solid #e0e6ef}
+.score{font-size:44px;font-weight:900}
+.badge{display:inline-block;background:#eff3ff;border-radius:30px;padding:6px 12px;font-size:13px}
+.celebrate{position:fixed;inset:0;pointer-events:none;overflow:hidden;z-index:99}
+.particle{position:absolute;top:-30px;animation:fall linear forwards;filter:drop-shadow(0 2px 4px #0002)}
+@keyframes fall{to{transform:translateY(115vh) rotate(720deg);opacity:.2}}
+.quote{font-size:20px;font-weight:bold;line-height:2.2;text-align:center;padding:15px}
+.quote-fa{line-height:2;text-align:center}
+.status{font-size:13px;color:#6b7489}
+ .analysis3d {
+  margin-top: 10px;
+  padding: 13px 16px;
+  border-radius: 14px;
+  color: #49320b;
+  background: linear-gradient(145deg, #fff8d9, #ffe7a3);
+  border: 1px solid #f2cb65;
+  box-shadow:
+    0 5px 0 #d6ad49,
+    0 8px 14px rgba(80, 55, 0, 0.18),
+    inset 0 2px 3px rgba(255, 255, 255, 0.9);
+  line-height: 1.9;
+  overflow-wrap: anywhere;
+}
+ .analysis3d {
+  margin-top: 10px;
+  padding: 14px 16px;
+  border-radius: 14px;
+  color: #49320b;
+  background: linear-gradient(145deg, #fff8d9, #ffe7a3);
+  border: 1px solid #f2cb65;
+  box-shadow:
+    0 5px 0 #d6ad49,
+    0 8px 14px rgba(80, 55, 0, 0.18),
+    inset 0 2px 3px rgba(255, 255, 255, 0.9);
+  line-height: 1.9;
+  overflow-wrap: anywhere;
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+<section id="start" class="card center">
+<h1>آزمون سوم · عربی عراقی</h1>
+<p>واژگان میوه‌ها و اعضای بدن با تأکید بر مکالمات کادر درمان</p>
+<div class="box">۳۰ سؤال · ۲۰ نمره</div>
+ <input
+  id="studentName"
+  type="text"
+  placeholder="نام و نام خانوادگی شرکت‌کننده"
+  autocomplete="name"
+  style="width:100%;padding:14px;border:2px solid #dfe4ed;border-radius:14px;font:inherit;margin:10px 0;"
+>
+<p class="muted">در سؤال‌های تستی، نتیجه بلافاصله نمایش داده می‌شود. در سؤال تشریحی تا واردکردن پاسخ نمی‌توانید جلو بروید.</p>
+<button class="primary" onclick="startQuiz()">شروع آزمون</button>
+</section>
+<section id="quiz" class="card hide">
+<div id="meta" class="muted"></div>
+<div class="bar"><i id="bar"></i></div>
+<div id="qbody"></div>
+</section>
+<section id="result" class="card hide"></section>
+</div>
+<div id="fx" class="celebrate"></div>
+
+<script src="https://developer.eitaa.com/eitaa-web-app.js"></script>
+<script>
+// آدرس Web App سمت سرور برای تصحیح هوش مصنوعی
+// کلید API هوش مصنوعی را هرگز در فایل HTML قرار ندهید.
+const AI_ENDPOINT="https://script.google.com/macros/s/AKfycbydVtdYvp0BeH8HhSgen_mGYh0JrvS6J9uZpCXNcrTVgFQ0WS-x1OXyZWYMRc7bbXL8Eg/exec";
+
+const questions=[
+{t:'m',p:.5,q:'«گصه» یعنی چه؟',a:['چانه','گونه','پیشانی','سینه'],c:2,w:'گصه',m:'پیشانی'}, 
+{t:'m',p:.5,q:'«خَدّ» یعنی چه؟',a:['لب','گونه','دندان','ران'],c:1,w:'خَدّ',m:'گونه'}, 
+
+{t:'m',p:.5,q:'«حنچ یا ذقن» یعنی چه؟',a:['پیشانی','زبان','چانه','قفسه سینه'],c:2,w:'حنچ یا ذقن',m:'چانه'}, 
+
+{t:'m',p:.5,q:'«شَفَة» یعنی چه؟',a:['گونه','دندان','کمر','لب'],c:3,w:'شَفَة',m:'لب'}, 
+
+{t:'m',p:.5,q:'«سِنّ» یعنی چه؟',a:['زبان','دندان','چانه','ران'],c:1,w:'سِنّ',m:'دندان'}, 
+
+{t:'m',p:.5,q:'«صَدْر» یعنی چه؟',a:['ساق پا','چانه','مچ پا','سینه'],c:3,w:'صَدْر',m:'سینه'}, 
+
+{t:'m',p:.5,q:'«فَخِذ» یعنی چه؟',a:['ساق پا','ران','بازو','پیشانی'],c:1,w:'فَخِذ',m:'ران'}, 
+
+{t:'m',p:.5,q:'«جِلْد» یعنی چه؟',a:['استخوان','پوست','عضله','زبان'],c:1,w:'جِلْد',m:'پوست'}, 
+
+{t:'m',p:.5,q:'«عَظْم» یعنی چه؟',a:['پوست','عضله','استخوان','لب'],c:2,w:'عَظْم',m:'استخوان'}, 
+
+{t:'m',p:.5,q:'«تُفّاح» یعنی چه؟',a:['موز','انگور','انار','سیب'],c:3,w:'تُفّاح',m:'سیب'}, 
+
+{t:'m',p:.5,q:'«رُمّان» یعنی چه؟',a:['انار','سیب','موز','انجیر'],c:0,w:'رُمّان',m:'انار'}, 
+
+{t:'m',p:.5,q:'«بِطّيخ» یعنی چه؟',a:['گلابی','هندوانه','انگور','زردآلو'],c:1,w:'بِطّيخ',m:'هندوانه'}, 
+
+{t:'m',p:.5,q:'«مِشْمِش» یعنی چه؟',a:['انجیر','خرما','زردآلو','سیب'],c:2,w:'مِشْمِش',m:'زردآلو'}, 
+
+{t:'m',p:.5,q:'«دَوْخة» یعنی چه؟',a:['سرفه','تب','درد شکم','سرگیجه'],c:3,w:'دَوْخة',m:'سرگیجه'}, 
+
+{t:'m',p:.5,q:'«عرموط» یعنی چه؟',a:['خرما','گلابی','انگور','سیب'],c:1,w:'عرموط',m:'گلابی'}, 
+
+{t:'m',p:.5,q:'«كَرَز» یعنی چه؟',a:['توت‌فرنگی','گیلاس','تمشک','زغال‌اخته'],c:1,w:'كَرَز',m:'گیلاس'}, 
+
+{t:'m',p:.5,q:'معنی واژه‌های «فُصمَه»، «بَذْرَة / حَبّة» و «قِشر» به‌ترتیب کدام است؟',a:['دانه، پوست، هسته','هسته، دانه، پوست','پوست، هسته، دانه','هسته، پوست، دانه'],c:1,w:'فُصمَه، بَذْرَة / حَبّة، قِشر',m:'هسته، دانه، پوست'}, 
+
+{t:'m',p:.5,q:'معنی واژه‌های «ثُوم»، «خَس»، «جَزَر» و «بَطاطا» به‌ترتیب کدام است؟',a:['سیر، کاهو، هویج، سیب‌زمینی','کاهو، سیر، سیب‌زمینی، هویج','سیر، هویج، کاهو، سیب‌زمینی','هویج، کاهو، سیر، سیب‌زمینی'],c:0,w:'ثُوم، خَس، جَزَر، بَطاطا',m:'سیر، کاهو، هویج، سیب‌زمینی'}, 
+
+{t:'m',p:.5,q:'«خوخ» یعنی چه؟',a:['آلو','هلو','گلابی','زردآلو'],c:1,w:'خوخ',m:'هلو'}, 
+
+{t:'m',p:.5,q:'عبارت «چان المريض يتنفس بصعوبة» مربوط به کدام زمان است؟',a:['حال استمراری','گذشته استمراری','آینده','امر'],c:1}, 
+
+{t:'m',p:.5,q:'کدام گزینه در عراقی معنی «داشت عضلاتش را حرکت می‌داد» می‌دهد؟',a:['راح يحرّك عضلاته','چان يحرّك عضلاته','دا حرّك عضلاته','يحرّك عضلاته راح'],c:1}, 
+
+{t:'m',p:.5,q:'برای گفتن «فردا پزشک معاینه‌ات می‌کند» کدام ساختار آینده مناسب است؟',a:['چان الطبيب يفحصك','دا الطبيب فحصك','باچر الطبيب راح يفحصك','الطبيب فحصك باچر'],c:2}, 
+
+{t:'m',p:.5,q:'«دا يِتَنَفَّس بِصُعُوبَة» بیشتر چه مفهومی دارد؟',a:['نفسش به‌سختی بالا می‌آید','خوب غذا می‌خورد','خوابیده است','فردا می‌آید'],c:0}, 
+
+{t:'m',p:.5,q:'کدام گزینه امرِ مناسب برای درخواست از بیمار است؟',a:['راح تفتح فمك','چان تفتح فمك','اِفْتَح فَمَك','دا فتح فمك'],c:2}, 
+
+{t:'m',p:.5,q:'«خُذ نَفَس عَميق، وبَعدين طَلِّعَه بِشْوَيّة» یعنی چه؟',a:['یک نفس عمیق بکش و بعد آرام بیرون بده','دهانت را باز کن','فردا دوباره بیا','دستت را بالا ببر'],c:0,w:'خُذ نَفَس عَميق، وبَعدين طَلِّعَه بِشْوَيّة',m:'یک نفس عمیق بکش و بعد آرام بیرون بده'}, 
+
+{t:'m',p:.5,q:'برای بیان «گذشته استمراری» در عربی عراقی کدام ساختار درست است؟',a:['راح + فعل مضارع','دا + فعل مضارع','لا + فعل مضارع','چان + فعل مضارع'],c:3}, 
+
+ 
+ // سه ترجمه ۲ نمره‌ای، یک تبدیل زمان ۱، یک ساعت نیم‌نمره‌ای
+{t:'e',p:2,q:'(بگو): «لطفاً دهانت را باز کن؛ می‌خواهم دندان‌هایت را بررسی کنم.»',expected:'رَجاءً، اِفْتَح فَمَك، أريد أَفْحَص أَسْنانَك.',rubric:'معنا ۱؛ طبیعی‌بودن عراقی ۰٫۵؛ ساختار و دستور ۰٫۵'},
+{t:'e',p:2,q:'(بگو): «از دیروز سینه‌ام درد می‌کند و نفس کشیدن برایم سخت است.»',expected:'مِن البارحة صَدْري يوجعني، والتنفس صعب عليّ.',rubric:'معنا ۱؛ طبیعی‌بودن عراقی ۰٫۵؛ ساختار و دستور ۰٫۵'},
+{t:'e',p:2,q:'(بگو): «اگر پایت ورم کرد یا رنگ پوستت تغییر کرد، به پرستار خبر بده.»',expected:'إذا رِجْلَك وَرِمَت أو لون جِلْدَك تغيّر، خَبِّر الممرّض/الممرّضة.',rubric:'معنا ۱؛ طبیعی‌بودن عراقی ۰٫۵؛ ساختار و دستور ۰٫۵'},
+{t:'e',p:.5,q:'(بگو): «ساعت نه و ربع شب» به عربی عراقی.',expected:'السّاعة تِسْعَة ورُبْع بالليل.',rubric:'بیان طبیعی ساعت: ۰٫۵ نمره'}
+];
+
+let pos=0,mcqScore=0,wrong=[],essayAnswers=[],userId='',studentName='';
+
+function startQuiz(){
+ const nameInput = document.getElementById('studentName');
+ const name = nameInput.value.trim();
+
+ if (!name) {
+  nameInput.focus();
+  nameInput.placeholder = 'لطفاً ابتدا نام و نام خانوادگی را وارد کنید';
+  return;
+ }
+
+ studentName = name;
+
+ document.getElementById('start').classList.add('hide');
+ document.getElementById('quiz').classList.remove('hide');
+ try{
+  if(window.Eitaa&&Eitaa.WebApp){
+   Eitaa.WebApp.ready();
+   userId=String(Eitaa.WebApp.initDataUnsafe?.user?.id||'');
+  }
+ }catch(e){}
+ renderQuestion();
+}
+
+function renderQuestion(){
+ const q=questions[pos];
+ const body=document.getElementById('qbody');
+ document.getElementById('meta').textContent=`سؤال ${pos+1} از ${questions.length} · ${q.p} نمره`;
+ document.getElementById('bar').style.width=(pos/questions.length*100)+'%';
+
+ if(q.t==='m'){
+  body.innerHTML=`<div class="question">${q.q}</div><div id="options"></div>`;
+
+  // جایگاه گزینه‌ها تصادفی می‌شود، اما اندیس پاسخ صحیح اصلی دست‌نخورده می‌ماند.
+  q._order=[0,1,2,3];
+  for(let i=q._order.length-1;i>0;i--){
+   const j=Math.floor(Math.random()*(i+1));
+   [q._order[i],q._order[j]]=[q._order[j],q._order[i]];
+  }
+
+  const labels=['الف','ب','ج','د'];
+  const container=document.getElementById('options');
+
+  q._order.forEach((originalIndex,displayIndex)=>{
+   const b=document.createElement('button');
+   b.className='opt';
+   b.textContent=`${labels[displayIndex]}. ${q.a[originalIndex]}`;
+   b.onclick=()=>answerMCQ(displayIndex,b);
+   container.appendChild(b);
+  });
+ }else{
+  body.innerHTML=`<span class="badge">سؤال تشریحی · ${q.p} نمره</span><div class="question">${q.q}</div><textarea id="essay" placeholder="پاسخ را بنویسید؛ بدون پاسخ نمی‌توانید ادامه دهید."></textarea><p id="needAnswer" class="muted"></p><button class="primary" onclick="saveEssay()">ثبت پاسخ و ادامه</button>`;
+ }
+}
+
+function answerMCQ(displayIndex,btn){
+ const q=questions[pos];
+ const opts=[...document.querySelectorAll('.opt')];
+ const originalIndex=q._order[displayIndex];
+ const correctDisplayIndex=q._order.indexOf(q.c);
+
+ opts.forEach(x=>x.disabled=true);
+
+ if(originalIndex===q.c){
+  mcqScore+=q.p;
+  btn.classList.add('correct');
+  fireworks();
+ }else{
+  btn.classList.add('incorrect');
+  opts[correctDisplayIndex].classList.add('correct');
+  wrong.push({
+   word:q.w||q.q,
+   meaning:q.m||q.a[q.c],
+   chosen:q.a[originalIndex],
+   correct:q.a[q.c],
+   question:q.q
+  });
+ }
+
+ try{
+  if(navigator.vibrate)navigator.vibrate(originalIndex===q.c?[40,30,60]:100);
+ }catch(e){}
+ setTimeout(next,850);
+}
+
+function saveEssay(){
+ const el=document.getElementById('essay');
+ const v=el.value.trim();
+ if(!v){
+  document.getElementById('needAnswer').textContent='برای رفتن به سؤال بعد، ابتدا پاسخ را بنویسید.';
+  el.focus();
+  return;
+ }
+ essayAnswers.push({
+  index:pos,
+  question:questions[pos].q,
+  answer:v,
+  expected:questions[pos].expected,
+  rubric:questions[pos].rubric,
+  maxScore:questions[pos].p
+ });
+ next();
+}
+
+function next(){
+ pos++;
+ if(pos<questions.length)renderQuestion();
+ else finish();
+}
+
+async function finish(){
+ document.getElementById('quiz').classList.add('hide');
+ const res=document.getElementById('result');
+ res.classList.remove('hide');
+ res.innerHTML='<div class="center"><h2>در حال بررسی پاسخ‌های تشریحی…</h2><p class="muted">در حال ارسال پاسخ‌ها برای تصحیح هوش مصنوعی هستیم.</p></div>';
+
+ let graded=[],analysis=null;
+
+ if(AI_ENDPOINT){
+  try{
+   console.log("پاسخ‌های تشریحی ارسالی:", essayAnswers);
+   console.log("essayAnswers:", essayAnswers);
+console.log("تعداد پاسخ‌های تشریحی:", essayAnswers.length);
+   const response=await fetch(AI_ENDPOINT,{
+    method:'POST',
+    headers:{'Content-Type':'text/plain;charset=UTF-8'},
+    body:JSON.stringify({
+     action:'grade_essays',
+     exam:'third',
+     userId,
+     studentName,
+     mcqScore,
+     mcqWrong:wrong,
+     answers:essayAnswers
+    })
+   });
+   if(!response.ok)throw new Error('HTTP '+response.status);
+   const data=await response.json();
+   graded=data.gradedAnswers||data.results||[];
+   analysis=data.analysis||null;
+  }catch(e){
+   console.error('AI grading error:',e);
+   res.innerHTML='<div class="center"><h2>دریافت تصحیح هوش مصنوعی ناموفق بود</h2><p class="muted">پاسخ‌های شما در همین صفحه باقی می‌مانند. اتصال Web App و گزارش خطا را بررسی کنید.</p></div>';
+   const retry=document.createElement('button');
+   retry.className='primary';
+   retry.textContent='تلاش دوباره برای تصحیح';
+   retry.onclick=()=>finish();
+   res.appendChild(retry);
+   return;
+  }
+ }
+
+ if(!graded.length){
+  res.innerHTML='<div class="center"><h2>پاسخ تصحیح دریافت نشد</h2><p class="muted">سرور متصل شد، اما فهرست پاسخ‌های تصحیح‌شده خالی بود. ساختار پاسخ Web App را بررسی کنید.</p></div>';
+  const retry=document.createElement('button');
+  retry.className='primary';
+  retry.textContent='تلاش دوباره';
+  retry.onclick=()=>finish();
+  res.appendChild(retry);
+  return;
+ }
+
+ const essayScore=graded.reduce((s,x)=>x.ungraded?s:s+(Number(x.score)||0),0);
+ const hasUngraded = graded.some(x => x.ungraded);
+const total = Math.min(20, mcqScore + essayScore);
+ showResults(total,graded,analysis);
+}
+
+function showResults(total,graded,analysis){
+ let h=`<div class="center"><h2>نتیجه آزمون سوم</h2><div class="score">${total.toFixed(1)} / 20</div><p>${(total/20*100).toFixed(0)}٪</p></div>`;
+
+ h+='<h3>واژگان تست‌های غلط</h3>';
+ h+=wrong.length
+  ?wrong.map(x=>`<div class="box wrongbox"><b>${esc(x.word)} : ${esc(x.meaning)}</b><div class="muted">انتخاب شما: ${esc(x.chosen)} · پاسخ صحیح: ${esc(x.correct)}</div></div>`).join('')
+  :'<div class="box">همه سؤال‌های تستی را درست پاسخ دادید.</div>';
+
+ h+='<h3>بررسی پاسخ‌های تشریحی</h3>';
+ h+=graded.map((x,i)=>{
+  const max=Number(x.maxScore??essayAnswers[i]?.maxScore)||0;
+const score=Number(x.score)||0;
+const scoreText=x.ungraded
+  ? 'تصحیح نشد؛ نمره هنوز مشخص نیست'
+  : `نمره: ${score} از ${max}`;
+  return `<div class="box essaybox">
+   <b>سؤال</b><br>${esc(x.question||essayAnswers[i]?.question||'')}
+   <br><br><b>پاسخ شما</b><br>${esc(x.studentAnswer||x.answer||essayAnswers[i]?.answer||'')}
+   <br><br><b>پاسخ پیشنهادی</b><br>${esc(x.correctAnswer||x.expected||essayAnswers[i]?.expected||'')}
+   <br><br><b>تحلیل پاسخ</b>
+   
+<div>${esc(x.analysis||x.feedback||'تحلیلی از سرور دریافت نشد.')}</div>
+${x.joke ? `<div class="analysis3d">✨ ${esc(x.joke)} ✨</div>` : ''}
+
+   <br><b>${scoreText}</b>
+  </div>`;
+ }).join('');
+
+
+ const mcqTotal=questions.filter(q=>q.t==='m').length;
+ const mcqCorrect=mcqTotal-wrong.length;
+ const essayMax=graded.reduce((sum,x,i)=>sum+(Number(x.maxScore??essayAnswers[i]?.maxScore)||0),0);
+ const essayScore=graded.reduce((sum,x)=>x.ungraded?sum:sum+(Number(x.score)||0),0);
+
+
+ if(total>=17){
+  h+=`<div class="quote">مَثَلُ الدُّنْيَا كَمَثَلِ ظِلِّك، إِنْ طَلَبْتَهُ تَبَاعَدَ وَإِنْ تَرَكْتَهُ تَتَابَع</div><p class="quote-fa">دنیا مثل سایه توست؛ اگر آن را دنبال کنی، دور می‌شود و اگر رهایش کنی، به دنبالت می‌آید.</p>`;
+  heartRain();
+ }
+
+ document.getElementById('result').innerHTML=h;
+}
+function formatAnalysis(text) {
+  text = String(text || '');
+
+  // شوخی در انتهای تحلیل قرار دارد و با ایموجی شروع می‌شود.
+  const match = text.match(/([\s\S]*?)(\s*[😂🤣😅😆🙊🐔🐴🐑🐝👏😍😘].*)$/u);
+
+  if (!match) return esc(text);
+
+  return `${esc(match[1])}
+    <div class="analysis3d">${esc(match[2])}</div>`;
+}
+function esc(s){
+ return String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+}
+
+function fireworks(){
+ const fx=document.getElementById('fx');
+ const symbols=['🎉','✨','🌈','🎊','🟣','🟡','🔵','🩷'];
+ for(let i=0;i<48;i++){
+  const e=document.createElement('span');
+  e.className='particle';
+  e.textContent=symbols[Math.floor(Math.random()*symbols.length)];
+  e.style.left=Math.random()*100+'%';
+  e.style.animationDuration=(1.1+Math.random()*1.5)+'s';
+  e.style.animationDelay=Math.random()*.2+'s';
+  e.style.fontSize=(14+Math.random()*18)+'px';
+  fx.appendChild(e);
+  setTimeout(()=>e.remove(),3000);
+ }
+}
+
+
+function heartRain(){
+ const fx = document.getElementById('fx');
+ if(!fx) return;
+
+ fx.innerHTML = '';
+ fx.style.display = 'block';
+
+ // بارش پیوسته قلب‌ها
+ const rain = setInterval(() => {
+  for(let i = 0; i < 5; i++){
+   const e = document.createElement('span');
+   e.className = 'particle';
+   e.textContent = ['❤️','💖','💗','💕','💘'][
+    Math.floor(Math.random() * 5)
+   ];
+
+   e.style.left = Math.random() * 100 + '%';
+   e.style.animationDuration = (3 + Math.random() * 3) + 's';
+   e.style.animationDelay = '0s';
+   e.style.fontSize = (18 + Math.random() * 20) + 'px';
+
+   fx.appendChild(e);
+
+   setTimeout(() => e.remove(), 6500);
+  }
+ }, 150);
+
+ // بارش پس از ۳۰ ثانیه متوقف می‌شود
+ setTimeout(() => clearInterval(rain), 30000);
+}
+
+</script>
+</body>
+</html>
