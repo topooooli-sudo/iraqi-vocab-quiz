@@ -68,8 +68,7 @@ button.primary{border:0;background:#4d77ff;color:white;padding:14px 22px;border-
 <section id="start" class="card center">
 <h1>آزمون چهارم · عربی عراقی</h1>
 <p>چکیده کلاس ها</p>
-<div class="box">۳۰ سؤال · ۲۰ نمره</div>
- <input
+<div class="box" id="examInfo">در حال محاسبه...</div> <input
   id="studentName"
   type="text"
   placeholder="نام و نام خانوادگی شرکت‌کننده"
@@ -136,6 +135,23 @@ const questions = [
  {t:'e',p:2,q:'ترجمه کنید: «ساعت 11:30 شب بود داشتم ماشینمو پارک می‌کردم که یه 206 به من زد و منم به یک موتوری زدم.»',expected:'چنت دا أصفّط سيارتي، إجت سيارة 206 وصدمتني، وأنا صدمت واحد على دراجة نارية.',rubric:'بیان پارک کردن و وقوع حادثه ۱؛ بیان برخورد با خودرو و موتورسوار ۰٫۵؛ طبیعی‌بودن عراقی و دستور ۰٫۵'}
 
 ];
+ function updateExamInfo() {
+  const questionCount = questions.length;
+
+  const totalPoints = questions.reduce(
+    (sum, question) => sum + Number(question.p || 0),
+    0
+  );
+
+  const infoBox = document.getElementById('examInfo');
+
+  if (infoBox) {
+    infoBox.textContent =
+      `${questionCount} سؤال · ${Number(totalPoints.toFixed(2))} نمره`;
+  }
+}
+
+updateExamInfo();
 let pos=0,mcqScore=0,wrong=[],essayAnswers=[],userId='',studentName='';
 
 function startQuiz(){
